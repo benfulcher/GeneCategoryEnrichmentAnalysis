@@ -14,7 +14,12 @@ end
 load('GOAnnotation.mat','allGOCategories','geneEntrezAnnotations');
 
 % Get GO ontology details
-GOTable = GetGOTerms(whatFilter);
+if strcmp(whatFilter,'biological_process') && exist('GOTerms_BP.mat','file')
+    load('GOTerms_BP.mat','GOTable');
+else
+    % Retrieve from mySQL database:
+    GOTable = GetGOTerms(whatFilter);
+end
 
 %-------------------------------------------------------------------------------
 % Filter
