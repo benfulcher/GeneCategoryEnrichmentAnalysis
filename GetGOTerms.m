@@ -15,9 +15,7 @@ dbc = SQL_opendatabase(connSettings);
 
 % e.g., Get all biological_process-tagged GO categories
 selectText = sprintf('SELECT acc,name FROM term WHERE term_type LIKE ''%s''',whatFilter);
-
 tableResults = mysql_dbquery(dbc,selectText);
-
 SQL_closedatabase(dbc);
 
 %-------------------------------------------------------------------------------

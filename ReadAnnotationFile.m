@@ -5,6 +5,7 @@ if nargin < 1
 end
 %-------------------------------------------------------------------------------
 
+fprintf(1,'Reading data from %s...',filePath);
 fid = fopen(filePath,'r');
 % headings = textscan(fid,'%s %s %s %s %s %s %s %s %s %s %s %s %s',1,'Delimiter','\t','CollectOutput',1);
 headings = textscan(fid,'%s %s %s %s %s %s',1,'Delimiter','\t','CollectOutput',1,'CommentStyle','#');
@@ -16,6 +17,8 @@ annotationTable.entrez_id = C{1};
 annotationTable.acronym = C{2};
 annotationTable.name = C{3};
 annotationTable.GO = C{4};
+fprintf(1,' Data loaded\n');
+% So now we have annotations for each gene (as rows of the annotation file)
 
 %-------------------------------------------------------------------------------
 % Get entrez IDs for each GO category
@@ -23,6 +26,7 @@ allGO = annotationTable.GO;
 hasGOAnn = cellfun(@(x)~isempty(x),allGO);
 allGO = allGO(hasGOAnn);
 allEntrez = annotationTable.entrez_id(hasGOAnn);
+
 % Split on pipe:
 allGOSplit = regexp(allGO,'\|','split');
 toNumber = @(GOCell) cellfun(@(x)str2num(x(4:end)),GOCell,'UniformOutput',true);
@@ -31,7 +35,7 @@ allGOTogether = horzcat(allGOSplitNum{:});
 allGOCategories = unique(allGOTogether);
 numGOCategories = length(allGOCategories);
 
-% Now, for each GO term, list the gene entrez that are annotated to it:
+% Now, for each GO term, list the gene entrez that are directly annotated to it:
 geneEntrezAnnotations = cell(numGOCategories,1);
 parfor i = 1:numGOCategories
     geneEntrezAnnotations{i} = allEntrez(cellfun(@(x)ismember(allGOCategories(i),x),allGOSplitNum));
@@ -44,6 +48,7 @@ filePath = fullfile('DataOutputs','GOAnnotation.mat');
 save(filePath,'annotationTable','allGOCategories','geneEntrezAnnotations');
 fprintf(1,'Saved to %s\n',filePath);
 
+fprintf(1,'Need to run propagateHierarchy...!\n');
 
 %-------------------------------------------------------------------------------
 % function GOIDs = toNumber(GOCell)
