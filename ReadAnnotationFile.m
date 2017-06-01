@@ -1,7 +1,7 @@
 function ReadAnnotationFile(filePath)
 
 if nargin < 1
-    filePath = '/Users/benfulcher/ermineJ.data/Generic_mouse_ncbiIds_noParents_Nov2016.an.txt';
+    filePath = '/Users/aurina/ermineJ.data/Generic_worm_noParents2017.an.txt';
 end
 %-------------------------------------------------------------------------------
 
@@ -9,11 +9,11 @@ fprintf(1,'Reading data from %s...',filePath);
 fid = fopen(filePath,'r');
 % headings = textscan(fid,'%s %s %s %s %s %s %s %s %s %s %s %s %s',1,'Delimiter','\t','CollectOutput',1);
 headings = textscan(fid,'%s %s %s %s %s %s',1,'Delimiter','\t','CollectOutput',1,'CommentStyle','#');
-C = textscan(fid,'%u %s %s %s %s %s','Delimiter','\t','CommentStyle','#','EndOfLine','\n');
+C = textscan(fid,'%s %s %s %s %s %s','Delimiter','\t','CommentStyle','#','EndOfLine','\n');
 fclose(fid);
 
 annotationTable = table();
-annotationTable.entrez_id = C{1};
+annotationTable.ProbeName = C{1};
 annotationTable.acronym = C{2};
 annotationTable.name = C{3};
 annotationTable.GO = C{4};
@@ -21,7 +21,7 @@ fprintf(1,' Data loaded\n');
 % So now we have annotations for each gene (as rows of the annotation file)
 
 %-------------------------------------------------------------------------------
-% Get entrez IDs for each GO category
+% Get gene acronyms IDs for each GO category
 allGO = annotationTable.GO;
 hasGOAnn = cellfun(@(x)~isempty(x),allGO);
 allGO = allGO(hasGOAnn);
@@ -38,14 +38,14 @@ numGOCategories = length(allGOCategories);
 % Now, for each GO term, list the gene entrez that are directly annotated to it:
 geneEntrezAnnotations = cell(numGOCategories,1);
 parfor i = 1:numGOCategories
-    geneEntrezAnnotations{i} = allEntrez(cellfun(@(x)ismember(allGOCategories(i),x),allGOSplitNum));
+    geneAcronymAnnotations{i} = allacronym(cellfun(@(x)ismember(allGOCategories(i),x),allGOSplitNum));
     % fprintf(1,'%u/%u\n',i,numGOCategories);
 end
 
 %-------------------------------------------------------------------------------
 % Save to file:
-filePath = fullfile('DataOutputs','GOAnnotation.mat');
-save(filePath,'annotationTable','allGOCategories','geneEntrezAnnotations');
+filePath = fullfile('Data/ermineJdata/','GOAnnotation.mat');
+save(filePath,'annotationTable','allGOCategories','geneAcronymAnnotations');
 fprintf(1,'Saved to %s\n',filePath);
 
 fprintf(1,'Need to run propagateHierarchy...!\n');
