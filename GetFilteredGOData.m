@@ -11,7 +11,7 @@ if nargin < 3
 end
 
 % Get GO annotation data (processed):
-load('GOAnnotation.mat','allGOCategories','geneEntrezAnnotations');
+load('GOAnnotationProp.mat','allGOCategories','geneEntrezAnnotations');
 
 % Get GO ontology details
 if strcmp(whatFilter,'biological_process') && exist('GOTerms_BP.mat','file')
@@ -42,6 +42,8 @@ else
     geneEntrezAnnotations = cellfun(@(x)x(ismember(x,ourEntrez)),geneEntrezAnnotations,'UniformOutput',false);
     sizeGOCategories = cellfun(@length,geneEntrezAnnotations);
 end
+GOTable.size = sizeGOCategories;
+fprintf(1,'GO categories have between %u and %u annotations\n',min(sizeGOCategories),max(sizeGOCategories));
 isGoodSize = (sizeGOCategories >= sizeFilter(1)) & (sizeGOCategories <= sizeFilter(2));
 allGOCategories = allGOCategories(isGoodSize);
 geneEntrezAnnotations = geneEntrezAnnotations(isGoodSize);

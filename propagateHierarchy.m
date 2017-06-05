@@ -1,4 +1,8 @@
-function propagateHierarchy()
+function propagateHierarchy(whatFilter)
+
+if nargin < 1
+    whatFilter = 'biological_process';
+end
 
 load('GOAnnotation.mat','annotationTable','allGOCategories','geneEntrezAnnotations');
 
@@ -65,7 +69,7 @@ for j = 1:numGOCategories
     idx = find(ismember(allGOCategories,GOTable.GOID(parentIDs)));
     % Add terms to parent
     for k = 1:length(idx) % loop over parents
-        geneEntrezAnnotations{idx(k)} = intersect(geneEntrezAnnotations{idx(k)},geneEntrezAnnotations{j});
+        geneEntrezAnnotations{idx(k)} = union(geneEntrezAnnotations{idx(k)},geneEntrezAnnotations{j});
         % Add annotations of child to all hierarchical parents
     end
     fprintf(1,'%u/%u\n',j,numGOCategories);
@@ -74,8 +78,8 @@ end
 %-------------------------------------------------------------------------------
 % Save
 hierarchyMatrix = sparse(hierarchyMatrix);
-filePath = fullfile('DataOutputs','GOAnnotationProp.mat');
-save(filePath,'annotationTable','allGOCategories','geneEntrezAnnotations','hierarchyMatrix');
-fprintf(1,'Saved to %s\n',filePath);
+fileNameSave = 'GOAnnotationProp.mat';
+save(fileNameSave,'annotationTable','allGOCategories','geneEntrezAnnotations','hierarchyMatrix');
+fprintf(1,'Saved to %s\n',fileNameSave);
 
 end

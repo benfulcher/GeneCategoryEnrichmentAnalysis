@@ -1,4 +1,4 @@
-function GOTable = SingleEnrichment(geneScores,geneEntrezIDs,processFilter,sizeFilter,numIters)
+function [GOTable,geneEntrezAnnotations] = SingleEnrichment(geneScores,geneEntrezIDs,processFilter,sizeFilter,numIters)
 %-------------------------------------------------------------------------------
 % Do an ermineJ style analysis for a given set of entrezIDs and scores
 %-------------------------------------------------------------------------------
@@ -16,8 +16,8 @@ end
 numGenes = length(geneScores);
 
 % Retrieve GO annotations:
-%[GOTable,geneEntrezAnnotations] = GetFilteredGOData(processFilter,sizeFilter,geneEntrezIDs);
-%sizeGOCategories = cellfun(@length,geneEntrezAnnotations);
+[GOTable,geneEntrezAnnotations] = GetFilteredGOData(processFilter,sizeFilter,geneEntrezIDs);
+sizeGOCategories = cellfun(@length,geneEntrezAnnotations);
 % Add to table:
 GOTable.size = sizeGOCategories;
 numGOCategories = height(GOTable);
@@ -63,5 +63,9 @@ pVals_corr = mafdr(pVals,'BHFDR','true');
 % Update the GO table:
 GOTable.pVal = pVals;
 GOTable.pVal_corr = pVals_corr;
+
+%-------------------------------------------------------------------------------
+% Sort:
+GOTable = sortrows(GOTable,{'pVal','pVal_corr'},{'ascend','ascend'});
 
 end
