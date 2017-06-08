@@ -5,14 +5,14 @@ function parentIDs = PropagateUp(idHere,hierarchyMatrix)
     parentsHere = find(hierarchyMatrix(:,idHere));
     numParents = length(parentsHere);
     parentIDs = parentsHere;
-    % if beVocal
-    %     fprintf(1,'--%s--\n',GOTable.GOName{idHere});
-    %     fprintf(1,'%u parents:',numParents);
-    %     for j = 1:numParents
-    %         fprintf(1,'%s, ',GOTable.GOName{parentsHere(j)});
-    %     end
-    %     fprintf(1,'\n');
-    % end
+    if beVocal
+        fprintf(1,'--%s--\n',GOTable.GOName{idHere});
+        fprintf(1,'%u parents:',numParents);
+        for j = 1:numParents
+            fprintf(1,'%s, ',GOTable.GOName{parentsHere(j)});
+        end
+        fprintf(1,'\n');
+    end
     if numParents == 0
         if beVocal
             fprintf(1,'Top of hierarchy at %u\n',idHere);

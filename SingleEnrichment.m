@@ -40,7 +40,7 @@ numSizes = length(uniqueSizes);
 nullDistribution = zeros(numSizes,numIters);
 fprintf(1,'Gene score reasmpling for %u iterations across %u category sizes (%u-%u)\n',...
                         numIters,numSizes,min(uniqueSizes),max(uniqueSizes));
-for j = 1:numIters
+parfor j = 1:numIters
     rp = randperm(numGenes); % takes a millisecond to compute this (put outside inner loop)
     for i = 1:numSizes
         nullDistribution(i,j) = nanmean(geneScores(rp(1:uniqueSizes(i))));
@@ -50,7 +50,7 @@ end
 %-------------------------------------------------------------------------------
 % Compute p-values
 pVals = zeros(numGOCategories,1);
-for i = 1:numGOCategories
+parfor i = 1:numGOCategories
     % Bigger is better:
     pVals(i) = mean(categoryScores(i) < nullDistribution(uniqueSizes==sizeGOCategories(i),:));
 end
@@ -63,6 +63,7 @@ pVals_corr = mafdr(pVals,'BHFDR','true');
 % Update the GO table:
 GOTable.pVal = pVals;
 GOTable.pVal_corr = pVals_corr;
+GOTable.meanScore = categoryScores;
 
 %-------------------------------------------------------------------------------
 % Sort:
