@@ -67,6 +67,7 @@ GOTable.meanScore = categoryScores;
 
 %-------------------------------------------------------------------------------
 % Sort:
-GOTable = sortrows(GOTable,{'pVal','pVal_corr'},{'ascend','ascend'});
+[GOTable,ix] = sortrows(GOTable,{'pVal','pVal_corr'},{'ascend','ascend'});
+geneEntrezAnnotations = geneEntrezAnnotations(ix);
 
 end
