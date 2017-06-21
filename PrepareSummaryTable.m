@@ -7,18 +7,18 @@ if nargin < 2
 end
 
 % 1. What are the different GO IDs implicated
-GOIDs = cellfun(@(x)x.GOID,enrichmentTables,'UniformOutput',0);
+GOIDs = cellfun(@(x)x.GOID,enrichmentTables,'UniformOutput',false);
 allGOIDs = unique(vertcat(GOIDs{:}));
 numGOIDs = length(allGOIDs);
 % map to names
 allGONames = cell(numGOIDs,1);
 for i = 1:numGOIDs
-    isHere = cellfun(@(x)ismember(allGOIDs{i},x),GOIDs);
+    isHere = cellfun(@(x)ismember(allGOIDs(i),x),GOIDs);
     isHere = find(isHere,1,'first');
-    thisRow = strcmp(enrichmentTables{isHere}.GOID,allGOIDs{i});
+    thisRow = enrichmentTables{isHere}.GOID==allGOIDs(i);
     allGONames{i} = enrichmentTables{isHere}.GOName{thisRow};
 end
-allGOLabels = arrayfun(@(x)sprintf('%s (%s)',allGONames{x},allGOIDs{x}),...
+allGOLabels = arrayfun(@(x)sprintf('%s (%u)',allGONames{x},allGOIDs(x)),...
                             1:numGOIDs,'UniformOutput',false);
 
 % 2. Prepare output

@@ -7,7 +7,7 @@ if nargin < 3
     processFilter = 'biological_process';
 end
 if nargin < 4
-    sizeFilter = [5,200];
+    sizeFilter = [5,100];
 end
 if nargin < 5
     numIters = 10000;
