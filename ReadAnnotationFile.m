@@ -1,7 +1,7 @@
-function ReadAnnotationFile(filePath)
+function annotationTable = ReadAnnotationFile(filePath)
 
 if nargin < 1
-    filePath = '/Users/aurina/ermineJ.data/Generic_worm_noParents2017.an.txt';
+    filePath = '/Users/aurina/ermineJ.data/Generic_worm_2017.an.txt';
 end
 %-------------------------------------------------------------------------------
 
@@ -40,7 +40,7 @@ end
 
 %-------------------------------------------------------------------------------
 % Save to file:
-filePath = fullfile('Data/ermineJdata/','GOAnnotation.mat');
+filePath = fullfile('Data/ermineJdata/','GOAnnotationWithParents.mat');
 save(filePath,'annotationTable','allGOCategories','geneAcronymAnnotations');
 fprintf(1,'Saved to %s\n',filePath);
 
