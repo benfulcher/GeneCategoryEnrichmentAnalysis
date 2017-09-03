@@ -1,10 +1,24 @@
-function propagateHierarchy(whatFilter)
+function propagateHierarchy(whatFilter,doGEMMA)
+% Process raw annotation data by propagating up the GO term hierarchy
+% That is, parent terms inherit annotations to their children
+%-------------------------------------------------------------------------------
 
 if nargin < 1
     whatFilter = 'biological_process';
 end
+if nargin < 2
+    doGEMMA = false;
+end
 
-load('GOAnnotation.mat','annotationTable','allGOCategories','geneEntrezAnnotations');
+if doGEMMA
+    fileNameLoad = 'GOAnnotationGEMMA.mat';
+    fileNameSave = 'GOAnnotationGEMMAProp.mat';
+else
+    fileNameLoad = 'GOAnnotationDirect.mat';
+    fileNameSave = 'GOAnnotationDirectProp.mat';
+end
+
+load(fileNameLoad,'annotationTable','allGOCategories','geneEntrezAnnotations');
 
 GOTable = GetGOTerms(whatFilter);
 
@@ -78,7 +92,6 @@ end
 %-------------------------------------------------------------------------------
 % Save
 hierarchyMatrix = sparse(hierarchyMatrix);
-fileNameSave = 'GOAnnotationProp.mat';
 save(fileNameSave,'annotationTable','allGOCategories','geneEntrezAnnotations','hierarchyMatrix');
 fprintf(1,'Saved to %s\n',fileNameSave);
 

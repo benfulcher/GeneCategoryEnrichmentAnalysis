@@ -1,21 +1,30 @@
-function ReadAnnotationFile(filePathRead)
-
+function ReadDirectAnnotationFile(filePathRead)
+% Can download annotation files direct from the GO website
+% http://geneontology.org/page/download-annotations
+% Each line in the file represents a single association between a gene product
+% and a GO term with a certain evidence code and the reference to support the link.
+% (http://geneontology.org/page/go-annotation-file-formats)
+%
+% This function processes these raw annotation files -> .mat file
+%-------------------------------------------------------------------------------
 if nargin < 1
-    filePathRead = '/Users/benfulcher/ermineJ.data/Generic_mouse_ncbiIds_noParents_Nov2016.an.txt';
+    filePathRead = 'mus_muscus_annotation.mgi';
 end
 %-------------------------------------------------------------------------------
 
 fprintf(1,'Reading data from %s...',filePathRead);
 fid = fopen(filePathRead,'r');
-% headings = textscan(fid,'%s %s %s %s %s %s %s %s %s %s %s %s %s',1,'Delimiter','\t','CollectOutput',1);
-headings = textscan(fid,'%s %s %s %s %s %s',1,'Delimiter','\t','CollectOutput',1,'CommentStyle','#');
-C = textscan(fid,'%u %s %s %s %s %s','Delimiter','\t','CommentStyle','#','EndOfLine','\n');
+% 1.DB, 2.DB Object ID, 3.DB ObjectSymbol, 4.Qualifier, 5.GOID, 6.DBReference(s),
+% 7.Evidence Code, 8.With/from, 9.Aspect (GO DAG: F,P,C), 10.DBObjectName,
+% 11.DBObject Synonym(s), 12.DBObject Type, 13.Taxon, 14.Date, 15.Assigned By
+% 16.Annotation Extension, 17.Gene Product Form ID
+C = textscan(fid,'%s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s','Delimiter','\t','CommentStyle','!','EndOfLine','\n');
 fclose(fid);
 
+% Represent as a Matlab table object (of form entrez,acronym,name,GO-annotations)
 annotationTable = table();
-annotationTable.entrez_id = C{1};
-annotationTable.acronym = C{2};
-annotationTable.name = C{3};
+annotationTable.acronym = C{3};
+annotationTable.qualifier = C{4};
 annotationTable.GO = C{4};
 fprintf(1,' Data loaded\n');
 
@@ -43,7 +52,7 @@ end
 
 %-------------------------------------------------------------------------------
 % Save to file:
-fileNameSave = 'GOAnnotation.mat';
+fileNameSave = 'GOAnnotationGEMMA.mat';
 save(fileNameSave,'annotationTable','allGOCategories','geneEntrezAnnotations');
 fprintf(1,'Saved to %s\n',fileNameSave);
 
