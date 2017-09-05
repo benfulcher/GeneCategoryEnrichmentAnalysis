@@ -23,16 +23,19 @@ fclose(fid);
 
 % Represent as a Matlab table object (of form entrez,acronym,name,GO-annotations)
 annotationTable = table();
+annotationTable.MGI_ID = C{2};
 annotationTable.acronym = C{3};
-annotationTable.qualifier = C{4};
+annotationTable.qualifier = categorical(C{4});
 annotationTable.GO = C{5};
-annotationTable.evidenceCode = C{7};
+annotationTable.evidenceCode = categorical(C{7});
+annotationTable.geneName = C{10};
+annotationTable.geneOrProtein = categorical(C{12});
 fprintf(1,' Data loaded\n');
 
 %-------------------------------------------------------------------------------
 % Exclude NOTs:
 % (could check later that they're not added to the labeled GO terms, after propagation...?)
-isNOT = strcmp(annotationTable.qualifier,'NOT');
+isNOT = (annotationTable.qualifier=='NOT');
 fprintf(1,'%u NOT annotations ignored\n',sum(isNOT));
 annotationTable = annotationTable(~isNOT,:);
 
@@ -42,13 +45,29 @@ annotationTable = annotationTable(~isNOT,:);
 % "Note: The ND evidence code, unlike other evidence codes, should be considered as
 % a code that indicates curation status/progress than as method used to derive an
 % annotation." [http://geneontology.org/page/nd-no-biological-data-available]
-isND = strcmp(annotationTable.evidenceCode,'ND');
+isND = (annotationTable.evidenceCode=='ND');
 fprintf(1,'%u ND annotations ignored\n',sum(isND));
 annotationTable = annotationTable(~isND,:);
 
 %-------------------------------------------------------------------------------
-% Get entrez IDs for each GO category
-allGO = annotationTable.GO;
+% Map genes -> entrez IDs:
+uniqueGenes = unique(annotationTable.acronym);
+numUniqueGenes = length(uniqueGenes);
+geneEntrez = zeros(numUniqueGenes,1);
+for i = 1:numUniqueGenes
+    geneEntrez(i) = GiveMeEntrezID(uniqueGenes{i},'mouse');
+end
+
+%-------------------------------------------------------------------------------
+% Get list of genes annotated to each GO category:
+allGOCategories = unique(annotationTable.GO);
+numGOCategories = length(allGO);
+fprintf(1,'%u GO terms represented\n',numGOCategories);
+geneAnnotations = cell(numGOCategories,1);
+for i = 1:numGOCategories
+    geneAnnotations{i} = annotationTable.acronym(strcmp(annotationTable.GO,allGOCategories{i}));
+end
+
 hasGOAnn = cellfun(@(x)~isempty(x),allGO);
 allGO = allGO(hasGOAnn);
 allEntrez = annotationTable.entrez_id(hasGOAnn);
