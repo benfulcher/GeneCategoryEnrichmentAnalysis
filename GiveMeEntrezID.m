@@ -1,8 +1,14 @@
-function entrezID = GiveMeEntrezID(geneAbbreviation)
+function entrezID = GiveMeEntrezID(geneAbbreviation,theSpecies)
 % Uses http://mygene.info to retrieve an entrezID from a given gene name
 %-------------------------------------------------------------------------------
 
-queryText = sprintf('http://mygene.info/v3/query?q=%s&fields=entrezgene&species=mouse&entrezonly=1',geneAbbreviation);
+% Check inputs, set defaults:
+if nargin < 2
+    theSpecies = 'mouse'; % 'mouse', 'human'
+end
+%-------------------------------------------------------------------------------
+
+queryText = sprintf('http://mygene.info/v3/query?q=%s&fields=entrezgene&species=%s&entrezonly=1',geneAbbreviation,theSpecies);
 data = webread(queryText);
 
 switch length(data.hits)

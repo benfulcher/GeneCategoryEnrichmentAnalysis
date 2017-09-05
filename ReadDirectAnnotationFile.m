@@ -25,8 +25,26 @@ fclose(fid);
 annotationTable = table();
 annotationTable.acronym = C{3};
 annotationTable.qualifier = C{4};
-annotationTable.GO = C{4};
+annotationTable.GO = C{5};
+annotationTable.evidenceCode = C{7};
 fprintf(1,' Data loaded\n');
+
+%-------------------------------------------------------------------------------
+% Exclude NOTs:
+% (could check later that they're not added to the labeled GO terms, after propagation...?)
+isNOT = strcmp(annotationTable.qualifier,'NOT');
+fprintf(1,'%u NOT annotations ignored\n',sum(isNOT));
+annotationTable = annotationTable(~isNOT,:);
+
+%-------------------------------------------------------------------------------
+% Exclude ND evidence codes
+% (cf. http://geneontology.org/page/guide-go-evidence-codes)
+% "Note: The ND evidence code, unlike other evidence codes, should be considered as
+% a code that indicates curation status/progress than as method used to derive an
+% annotation." [http://geneontology.org/page/nd-no-biological-data-available]
+isND = strcmp(annotationTable.evidenceCode,'ND');
+fprintf(1,'%u ND annotations ignored\n',sum(isND));
+annotationTable = annotationTable(~isND,:);
 
 %-------------------------------------------------------------------------------
 % Get entrez IDs for each GO category
@@ -56,10 +74,5 @@ fileNameSave = 'GOAnnotationGEMMA.mat';
 save(fileNameSave,'annotationTable','allGOCategories','geneEntrezAnnotations');
 fprintf(1,'Saved to %s\n',fileNameSave);
 
-
-%-------------------------------------------------------------------------------
-% function GOIDs = toNumber(GOCell)
-%     GOIDs = cellfun(@(x)str2num(x(4:end)),GOCell,'UniformOutput',true);
-% end
 
 end
