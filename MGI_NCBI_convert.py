@@ -17,7 +17,7 @@ MGIIDFile = "MGI_IDs.csv"
 with open(MGIIDFile,'rb') as f:
     reader = csv.reader(f)
     MGIIDList = list(reader)
-MGIIDList = [MGIIDList[x][0] for x in range(len(your_list))]
+MGIIDList = [MGIIDList[x][0] for x in range(len(MGIIDList))]
 
 # Convert to NCBI Gene IDs
 MGIDict = []
@@ -26,11 +26,11 @@ for x in range(len(MGIIDList)):
     query.add_view("primaryIdentifier", "ncbiGeneNumber", "symbol")
     query.add_constraint("primaryIdentifier", "=", MGIIDList[x], code = "A")
     for row in query.rows():
-        print row["primaryIdentifier"], row["symbol"], row["ncbiGeneNumber"]
+        print x, '/', len(MGIIDList), ':', row["primaryIdentifier"], row["symbol"], row["ncbiGeneNumber"]
         MGIDict.append({'MGIID':MGIIDList[x], 'symbol':row['symbol'], 'NCBIGeneNumber':row["ncbiGeneNumber"]})
 
 # To dataframe:
-df = pd.DataFrame(d)
+df = pd.DataFrame(MGIDict)
 
 # Save out:
 allDataFilename = "MGI_ID_NCBI.csv"
