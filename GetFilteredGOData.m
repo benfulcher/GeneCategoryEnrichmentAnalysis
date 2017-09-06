@@ -1,17 +1,31 @@
-function [GOTable,geneEntrezAnnotations] = GetFilteredGOData(whatFilter,sizeFilter,ourEntrez)
+function [GOTable,geneEntrezAnnotations] = GetFilteredGOData(whatSource,whatFilter,sizeFilter,ourEntrez)
 
 if nargin < 1
-    whatFilter = 'biological_process';
+    whatSource = 'direct'; % Direct annotations from GO
+    % whatSource = 'GEMMA'; % Annotations derived from GEMMA
 end
 if nargin < 2
-    sizeFilter = [5,200];
+    whatFilter = 'biological_process';
 end
 if nargin < 3
+    sizeFilter = [5,200];
+end
+if nargin < 4
     ourEntrez = [];
 end
 
-% Get GO annotation data (processed):
-load('GOAnnotationProp.mat','allGOCategories','geneEntrezAnnotations');
+%-------------------------------------------------------------------------------
+% Load processed GO annotation data (i.e., direct annotations propagated up the hierarchy):
+% cf. propagateHierarchy to map files generated from ReadDirectAnnotationFile or ReadGEMMAAnnotationFile
+switch whatSource
+case 'direct'
+    fileNameLoad = 'GOAnnotationDirectProp.mat';
+case 'GEMMA'
+    fileNameLoad = 'GOAnnotationGEMMAProp.mat';
+otherwise
+    error('Unknown annotation source: ''%s''',whatSource);
+end
+load('GOAnnotationDirect.mat','allGOCategories','geneEntrezAnnotations');
 
 % Get GO ontology details
 if strcmp(whatFilter,'biological_process') && exist('GOTerms_BP.mat','file')
