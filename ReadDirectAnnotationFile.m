@@ -89,6 +89,7 @@ numUniqueGenes = length(uniqueGenes);
 
 %-------------------------------------------------------------------------------
 % Assign Entrez_ID to each annotation, and add as a column in the annotation table:
+% (slow because matching on strings... :-/ Could convert to integers for faster matching)
 fprintf(1,'Mapping MGI IDs to Entrez IDs across the annotation table (%u genes -> %u annotations)...',...
                         numUniqueGenes,height(annotationTable));
 annotationEntrez = nan(height(annotationTable),1);
@@ -104,13 +105,15 @@ fprintf(1,'%u = 0!!\n',sum(isnan(annotationTable.EntrezID));
 
 %-------------------------------------------------------------------------------
 % Now get list of genes annotated to each GO category:
+% (slow because matching on strings; could convert GO IDs to integers for faster matching)
 allGOCategories = unique(annotationTable.GO);
-numGOCategories = length(allGO);
-fprintf(1,'%u GO terms represented\n',numGOCategories);
+numGOCategories = length(allGOCategories);
+fprintf(1,'%u GO terms represented... Annotating to Entrez IDs...',numGOCategories);
 geneEntrezAnnotations = cell(numGOCategories,1);
-for i = 1:numGOCategories
+parfor i = 1:numGOCategories
     geneEntrezAnnotations{i} = annotationTable.EntrezID(strcmp(annotationTable.GO,allGOCategories{i}));
 end
+fprintf(1,' Annotated.\n');
 
 %-------------------------------------------------------------------------------
 % Filter out categories that have no annotations
