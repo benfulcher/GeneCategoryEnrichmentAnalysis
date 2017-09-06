@@ -7,6 +7,9 @@
 #-------------------------------------------------------------------------------
 
 from intermine.webservice import Service
+import pandas as pd
+
+# Initiate mousemine service:
 service = Service("http://www.mousemine.org/mousemine/service")
 
 # query description - Returns all genes for the specified organism.
