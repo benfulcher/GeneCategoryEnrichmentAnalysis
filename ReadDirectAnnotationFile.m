@@ -7,9 +7,9 @@ function ReadDirectAnnotationFile(filePathRead)
 %
 % This function processes these raw annotation files -> .mat file
 %-------------------------------------------------------------------------------
-if nargin < 1
+% if nargin < 1
     filePathRead = 'mus_muscus_annotation.mgi';
-end
+% end
 %-------------------------------------------------------------------------------
 
 fprintf(1,'Reading data from %s...',filePathRead);
@@ -57,38 +57,41 @@ numUniqueGenes = length(uniqueGenes);
 %-------------------------------------------------------------------------------
 % Map genes -> entrez IDs:
 % Load mapping (generated from mousemine: cf. MGI_NCBI_downloadall.py)
-fprintf(1,'Loading MGI->NCBI mapping...');
+fprintf(1,'Loading MGI->NCBI mapping from file...');
 MGI_NCBI_Map = ImportMGI_NCBI_Map(true);
 fprintf(1,' Loaded.\n');
 geneEntrez = nan(numUniqueGenes,1);
 for i = 1:numUniqueGenes
     isHere = strcmp(MGI_NCBI_Map.MGIID,uniqueGenes{i});
-    if isempty(isHere)
+    if sum(isHere)==0
         fprintf(1,'Nothing for %s\n',uniqueGenes{i});
-    else
+    elseif sum(isHere)==1
         geneEntrez(i) = MGI_NCBI_Map.NCBIGeneNumber(isHere);
+    else
+        error('whoa')
     end
 end
 
 %-------------------------------------------------------------------------------
 % Filter out MGI annotations for genes with no Entrez ID:
-MGI_hasNoEntrez = MGI_NCBI_Map.MGIID(isnan(geneEntrez));
+MGI_hasNoEntrez = uniqueGenes(isnan(geneEntrez));
 fprintf(1,'%u genes have no Entrez ID\n',sum(isnan(geneEntrez)));
 annotationsNoEntrez = ismember(annotationTable.MGI_ID,MGI_hasNoEntrez);
 fprintf(1,'%u annotations for genes/proteins with no NCBI (Entrez) ID are being ignored\n',...
                         sum(annotationsNoEntrez));
 annotationTable = annotationTable(~annotationsNoEntrez,:);
 
-% Filter uniqueGenes
+%-------------------------------------------------------------------------------
+% Filter uniqueGenes to just be those with EntrezIDs:
 uniqueGenes = uniqueGenes(~isnan(geneEntrez));
 geneEntrez = geneEntrez(~isnan(geneEntrez));
 numUniqueGenes = length(uniqueGenes);
 
 %-------------------------------------------------------------------------------
 % Assign Entrez_ID to each annotation, and add as a column in the annotation table:
-fprintf(1,'Mapping MGI IDs to Entrez IDs across the annotation table (%u genes -> %u entries)...',...
+fprintf(1,'Mapping MGI IDs to Entrez IDs across the annotation table (%u genes -> %u annotations)...',...
                         numUniqueGenes,height(annotationTable));
-annotationEntrez = zeros(height(annotationTable),1);
+annotationEntrez = nan(height(annotationTable),1);
 for i = 1:numUniqueGenes
     annotationsHere = strcmp(annotationTable.MGI_ID,uniqueGenes{i});
     annotationEntrez(annotationsHere) = geneEntrez(i);
@@ -96,40 +99,29 @@ end
 annotationTable.EntrezID = annotationEntrez;
 fprintf(1,'Done.\n');
 
+% Hopefully this is zero:
+fprintf(1,'%u = 0!!\n',sum(isnan(annotationTable.EntrezID));
+
 %-------------------------------------------------------------------------------
-% Get list of genes annotated to each GO category:
+% Now get list of genes annotated to each GO category:
 allGOCategories = unique(annotationTable.GO);
 numGOCategories = length(allGO);
 fprintf(1,'%u GO terms represented\n',numGOCategories);
-geneAnnotations = cell(numGOCategories,1);
-for i = 1:numGOCategories
-    geneAnnotations{i} = annotationTable.acronym(strcmp(annotationTable.GO,allGOCategories{i}));
-end
-
-hasGOAnn = cellfun(@(x)~isempty(x),allGO);
-allGO = allGO(hasGOAnn);
-allEntrez = annotationTable.entrez_id(hasGOAnn);
-
-% Split on pipe:
-allGOSplit = regexp(allGO,'\|','split');
-toNumber = @(GOCell) cellfun(@(x)str2num(x(4:end)),GOCell,'UniformOutput',true);
-allGOSplitNum = cellfun(@(x)toNumber(x),allGOSplit,'UniformOutput',false);
-allGOTogether = horzcat(allGOSplitNum{:});
-allGOCategories = unique(allGOTogether);
-numGOCategories = length(allGOCategories);
-
-% Now, for each GO term, list the gene entrez that are annotated to it:
 geneEntrezAnnotations = cell(numGOCategories,1);
-parfor i = 1:numGOCategories
-    geneEntrezAnnotations{i} = allEntrez(cellfun(@(x)ismember(allGOCategories(i),x),allGOSplitNum));
-    % fprintf(1,'%u/%u\n',i,numGOCategories);
+for i = 1:numGOCategories
+    geneEntrezAnnotations{i} = annotationTable.EntrezID(strcmp(annotationTable.GO,allGOCategories{i}));
 end
 
 %-------------------------------------------------------------------------------
+% Filter out categories that have no annotations
+hasGOAnn = cellfun(@(x)~isempty(x),geneEntrezAnnotations);
+allGOCategories = allGOCategories(hasGOAnn);
+fprintf(1,'Filtered out %u GO categories with no annotations\n',sum(~hasGOAnn));
+
+%-------------------------------------------------------------------------------
 % Save to file:
-fileNameSave = 'GOAnnotationGEMMA.mat';
+fileNameSave = 'GOAnnotationDirect.mat';
 save(fileNameSave,'annotationTable','allGOCategories','geneEntrezAnnotations');
 fprintf(1,'Saved to %s\n',fileNameSave);
-
 
 end
