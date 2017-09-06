@@ -50,21 +50,51 @@ fprintf(1,'%u ND annotations ignored\n',sum(isND));
 annotationTable = annotationTable(~isND,:);
 
 %-------------------------------------------------------------------------------
-% Map genes -> entrez IDs:
+% Organize the remaining genes:
 uniqueGenes = unique(annotationTable.MGI_ID);
 numUniqueGenes = length(uniqueGenes);
-fid = fopen('MGI_IDs.csv','w');
-for i = 1:numUniqueGenes
-    fprintf(fid,'%s\n',uniqueGenes{i});
-end
-fclose(fid);
 
-uniqueGenes = unique(annotationTable.acronym);
-numUniqueGenes = length(uniqueGenes);
-geneEntrez = zeros(numUniqueGenes,1);
+%-------------------------------------------------------------------------------
+% Map genes -> entrez IDs:
+% Load mapping (generated from mousemine: cf. MGI_NCBI_downloadall.py)
+fprintf(1,'Loading MGI->NCBI mapping...');
+MGI_NCBI_Map = ImportMGI_NCBI_Map(true);
+fprintf(1,' Loaded.\n');
+geneEntrez = nan(numUniqueGenes,1);
 for i = 1:numUniqueGenes
-    geneEntrez(i) = GiveMeEntrezID(uniqueGenes{i},'mouse');
+    isHere = strcmp(MGI_NCBI_Map.MGIID,uniqueGenes{i});
+    if isempty(isHere)
+        fprintf(1,'Nothing for %s\n',uniqueGenes{i});
+    else
+        geneEntrez(i) = MGI_NCBI_Map.NCBIGeneNumber(isHere);
+    end
 end
+
+%-------------------------------------------------------------------------------
+% Filter out MGI annotations for genes with no Entrez ID:
+MGI_hasNoEntrez = MGI_NCBI_Map.MGIID(isnan(geneEntrez));
+fprintf(1,'%u genes have no Entrez ID\n',sum(isnan(geneEntrez)));
+annotationsNoEntrez = ismember(annotationTable.MGI_ID,MGI_hasNoEntrez);
+fprintf(1,'%u annotations for genes/proteins with no NCBI (Entrez) ID are being ignored\n',...
+                        sum(annotationsNoEntrez));
+annotationTable = annotationTable(~annotationsNoEntrez,:);
+
+% Filter uniqueGenes
+uniqueGenes = uniqueGenes(~isnan(geneEntrez));
+geneEntrez = geneEntrez(~isnan(geneEntrez));
+numUniqueGenes = length(uniqueGenes);
+
+%-------------------------------------------------------------------------------
+% Assign Entrez_ID to each annotation, and add as a column in the annotation table:
+fprintf(1,'Mapping MGI IDs to Entrez IDs across the annotation table (%u genes -> %u entries)...',...
+                        numUniqueGenes,height(annotationTable));
+annotationEntrez = zeros(height(annotationTable),1);
+for i = 1:numUniqueGenes
+    annotationsHere = strcmp(annotationTable.MGI_ID,uniqueGenes{i});
+    annotationEntrez(annotationsHere) = geneEntrez(i);
+end
+annotationTable.EntrezID = annotationEntrez;
+fprintf(1,'Done.\n');
 
 %-------------------------------------------------------------------------------
 % Get list of genes annotated to each GO category:
