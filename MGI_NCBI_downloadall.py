@@ -30,12 +30,12 @@ query.set_logic("A and B")
 # Fill the MGI ID dictionary:
 MGIDict = []
 for row in query.rows():
-    MGIDict.append({'MGIID':MGIIDList[x], 'symbol':row['symbol'], 'NCBIGeneNumber':row["ncbiGeneNumber"]})
+    MGIDict.append({"MGIID":row["primaryIdentifier"], "symbol":row["symbol"], "NCBIGeneNumber":row["ncbiGeneNumber"]})
     # print row["primaryIdentifier"], row["symbol"], row["ncbiGeneNumber"]
 
 # Convert to dataframe:
 df = pd.DataFrame(MGIDict)
 
 # Save out to csv
-allDataFilename = "MGI_ID_NCBI.csv"
+allDataFilename = "ALL_MGI_ID_NCBI.csv"
 df.to_csv(allDataFilename)
