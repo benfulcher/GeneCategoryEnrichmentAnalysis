@@ -2,12 +2,9 @@ from intermine.webservice import Service
 import pandas as pd
 import csv # For saving string data to csv
 
-def SaveListCSV(stringList,fileName):
-    # Outputs a csv from a given list of strings
-    resultFile = open(fileName,'wb')
-    wr = csv.writer(resultFile, dialect='excel')
-    wr.writerow(stringList)
-
+# Idea is to convert a list of MGI IDs (.csv input) -> NCBI (Entrez) Gene IDs (.csv output)
+# (For info on Entrez IDs):
+# https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3013746/
 
 # Initiate a mousemine service:
 service = Service("http://www.mousemine.org/mousemine/service")
@@ -28,6 +25,14 @@ for x in range(len(MGIIDList)):
     for row in query.rows():
         print x, '/', len(MGIIDList), ':', row["primaryIdentifier"], row["symbol"], row["ncbiGeneNumber"]
         MGIDict.append({'MGIID':MGIIDList[x], 'symbol':row['symbol'], 'NCBIGeneNumber':row["ncbiGeneNumber"]})
+    if x>0 and ((x % 500)==0):
+        # To dataframe:
+        df = pd.DataFrame(MGIDict)
+
+        # Save out:
+        allDataFilename = "MGI_ID_NCBI_%u.csv" % x
+        df.to_csv(allDataFilename)
+        print 'Saved yo - %u' % x
 
 # To dataframe:
 df = pd.DataFrame(MGIDict)
