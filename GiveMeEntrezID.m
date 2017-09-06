@@ -27,9 +27,15 @@ case 2
     elseif all(entrezIDs==entrezIDs(1))
         entrezID = entrezIDs(1);
     else
+        entrezID = NaN;
         warning('%u inconsistent entrez IDs for %s',length(entrezIDs),geneAbbreviation);
+        for i = 1:length(entrezIDs)
+            fprintf(1,'%u\t',entrezIDs(i));
+        end
+        fprintf(1,'\n');
     end
 otherwise
+    entrezID = NaN;
     warning('Error getting entrez ID from mygene.info for %s',geneAbbreviation);
 end
 
