@@ -51,6 +51,14 @@ annotationTable = annotationTable(~isND,:);
 
 %-------------------------------------------------------------------------------
 % Map genes -> entrez IDs:
+uniqueGenes = unique(annotationTable.MGI_ID);
+numUniqueGenes = length(uniqueGenes);
+fid = fopen('MGI_IDs.csv','w');
+for i = 1:numUniqueGenes
+    fprintf(fid,'%s\n',uniqueGenes{i});
+end
+fclose(fid);
+
 uniqueGenes = unique(annotationTable.acronym);
 numUniqueGenes = length(uniqueGenes);
 geneEntrez = zeros(numUniqueGenes,1);
