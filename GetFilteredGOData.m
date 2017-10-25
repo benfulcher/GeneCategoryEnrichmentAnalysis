@@ -19,13 +19,14 @@ end
 % cf. propagateHierarchy to map files generated from ReadDirectAnnotationFile or ReadGEMMAAnnotationFile
 switch whatSource
 case 'direct'
-    fileNameLoad = 'GOAnnotationDirectProp.mat';
+    fileNameLoad = sprintf('GOAnnotationDirect-%s-Prop.mat',whatFilter);
 case 'GEMMA'
     fileNameLoad = 'GOAnnotationGEMMAProp.mat';
 otherwise
     error('Unknown annotation source: ''%s''',whatSource);
 end
-load('GOAnnotationDirect.mat','allGOCategories','geneEntrezAnnotations');
+load(fileNameLoad,'allGOCategories','geneEntrezAnnotations');
+fprintf(1,'Loaded annotations from %s\n',fileNameLoad);
 
 % Get GO ontology details
 if strcmp(whatFilter,'biological_process') && exist('GOTerms_BP.mat','file')
