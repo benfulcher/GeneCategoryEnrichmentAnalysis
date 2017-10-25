@@ -8,7 +8,7 @@ function ReadDirectAnnotationFile(filePathRead)
 % This function processes these raw annotation files -> .mat file
 %-------------------------------------------------------------------------------
 % if nargin < 1
-    filePathRead = 'mus_muscus_annotation.mgi';
+filePathRead = 'mus_muscus_annotation.mgi';
 % end
 %-------------------------------------------------------------------------------
 
@@ -101,7 +101,7 @@ annotationTable.EntrezID = annotationEntrez;
 fprintf(1,'Done.\n');
 
 % Hopefully this is zero:
-fprintf(1,'%u = 0!!\n',sum(isnan(annotationTable.EntrezID));
+fprintf(1,'Hopefully %u = 0!!\n',sum(isnan(annotationTable.EntrezID)));
 
 %-------------------------------------------------------------------------------
 % Now get list of genes annotated to each GO category:
@@ -120,6 +120,7 @@ fprintf(1,' Annotated.\n');
 hasGOAnn = cellfun(@(x)~isempty(x),geneEntrezAnnotations);
 allGOCategories = allGOCategories(hasGOAnn);
 fprintf(1,'Filtered out %u GO categories with no annotations\n',sum(~hasGOAnn));
+allGOCategories = vertcat(allGOCategories{:}); % stretch out
 
 %-------------------------------------------------------------------------------
 % Save to file:
