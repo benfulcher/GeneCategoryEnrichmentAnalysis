@@ -53,11 +53,16 @@ numGOCategories = height(GOTerms);
 if isempty(ourEntrez)
     fprintf(1,'Filtering on actual annotated size of GO category\n');
     sizeGOCategories = cellfun(@length,geneEntrezAnnotationsFull);
+    fprintf(1,'%u GO categories have no annotations :-/\n',...
+                    sum(sizeGOCategories==0));
 else
-    fprintf(1,'Filtering on size of GO category after matching to our genes\n');
+    fprintf(1,'Filtering on size of GO category after matching to our %u genes\n',length(ourEntrez));
     % Make sure all annotations match those in our set of entrez_ids
-    geneEntrezAnnotationsFull = cellfun(@(x)x(ismember(x,ourEntrez)),geneEntrezAnnotationsFull,'UniformOutput',false);
+    geneEntrezAnnotationsFull = cellfun(@(x)x(ismember(x,ourEntrez)),geneEntrezAnnotationsFull,...
+                                        'UniformOutput',false);
     sizeGOCategories = cellfun(@length,geneEntrezAnnotationsFull);
+    fprintf(1,'%u GO categories have no annotations matching our %u genes\n',...
+                    sum(sizeGOCategories==0),length(ourEntrez));
 end
 GOTable.size = sizeGOCategories;
 fprintf(1,'GO categories have between %u and %u annotations\n',min(sizeGOCategories),max(sizeGOCategories));
