@@ -20,9 +20,10 @@ else
     fileNameSave = sprintf('GOAnnotationDirect-%s-Prop.mat',whatFilter);
 end
 
-load(fileNameLoad,'annotationTable','allGOCategories','geneEntrezAnnotations');
+load(fileNameLoad,'allGOCategories','geneEntrezAnnotations');
+numGOCategoriesDirect = length(allGOCategories); % GO categories with direct annotations
 
-GOTable = GetGOTerms(whatFilter);
+GOTerms = GetGOTerms(whatFilter);
 
 %-------------------------------------------------------------------------------
 % mySQL query for hierarchy:
@@ -57,44 +58,87 @@ SQL_closedatabase(dbc);
 id1 = vertcat(hierarchyRel1{:,1});
 id2 = vertcat(hierarchyRel2{:,1});
 [idBoth,ix1,ix2] = intersect(id1,id2);
-hierarchyRel = [vertcat(cellfun(@(x)str2num(x(4:end)),hierarchyRel1(ix1,2))),...
-                vertcat(cellfun(@(x)str2num(x(4:end)),hierarchyRel2(ix2,2)))];
+GOtoNumber = @(x)str2num(x(4:end));
+hierarchyRel = [vertcat(cellfun(GOtoNumber,hierarchyRel1(ix1,2))),...
+                vertcat(cellfun(GOtoNumber,hierarchyRel2(ix2,2)))];
 % So we have pairwise *is_a* interactions in hierarchyRel
 
 %===============================================================================
 % Now filter on terms that exist in our set of BP GO terms
-yeahBP = ismember(hierarchyRel,GOTable.GOID);
+yeahBP = ismember(hierarchyRel,GOTerms.GOID);
 isBP = all(yeahBP,2);
-fprintf(1,'%.2f%% of hierarchical relationships are related to our categories\n',mean(isBP)*100);
+fprintf(1,'%.2f%% of hierarchical relationships are related to our categories\n',...
+                            mean(isBP)*100);
 hierarchyRel = hierarchyRel(isBP,:);
-numGOTerms = height(GOTable);
-fprintf(1,'So we have %u hierachical relationships between %u GO terms\n',length(hierarchyRel),numGOTerms);
+numGOTerms = height(GOTerms);
+fprintf(1,'So we have %u hierachical relationships between %u GO terms\n',...
+                        length(hierarchyRel),numGOTerms);
 
+%-------------------------------------------------------------------------------
 % Convert to pairwise matrix
+% (makes matching easier for hierarchy propagation)
+%-------------------------------------------------------------------------------
 hierarchyMatrix = zeros(numGOTerms,numGOTerms);
 for i = 1:size(hierarchyRel,1)
-    hierarchyMatrix(GOTable.GOID==hierarchyRel(i,1),GOTable.GOID==hierarchyRel(i,2)) = 1;
+    hierarchyMatrix(GOTerms.GOID==hierarchyRel(i,1),GOTerms.GOID==hierarchyRel(i,2)) = 1;
 end
 
-% Propagate:
-numGOCategories = length(allGOCategories);
-for j = 1:numGOCategories
+%-------------------------------------------------------------------------------
+% Filter direct annotations -> just include BPs
+%-------------------------------------------------------------------------------
+isBP = ismember(allGOCategories,GOTerms.GOID);
+allGOCategoriesFiltered = allGOCategories(isBP);
+geneEntrezAnnotationsFiltered = geneEntrezAnnotations(isBP);
+fprintf(1,'%u/%u GO categories with direct annotations are %s\n',...
+                    sum(isBP),length(isBP),whatFilter);
+numGOCategoriesDirect = sum(isBP);
+
+%-------------------------------------------------------------------------------
+% Prepare annotations for all (and start off categories with direct annotations):
+%-------------------------------------------------------------------------------
+geneEntrezAnnotationsFull = cell(numGOTerms,1);
+ind = arrayfun(@(x)find(GOTerms.GOID==x),allGOCategoriesFiltered);
+% ind = zeros(numGOCategoriesDirect,1);
+% for i = 1:numGOCategoriesDirect
+%     tt = find(GOTerms.GOID==allGOCategoriesFiltered(i));
+%     if isempty(tt)
+%         keyboard
+%     end
+%     ind(i) = tt;
+% end
+% Add direct annotations to the necessary parts of the full set of BP categories:
+geneEntrezAnnotationsFull(ind) = geneEntrezAnnotationsFiltered;
+
+%-------------------------------------------------------------------------------
+% Propagate each directly annotated GO category up the full hierarchy:
+%-------------------------------------------------------------------------------
+for j = 1:numGOCategoriesDirect
     % Get parents of category using the full GO hierarchy
-    parentIDs = PropagateUp(find(GOTable.GOID==allGOCategories(j)),hierarchyMatrix);
+    parentIDs = PropagateUp(find(GOTerms.GOID==allGOCategories(j)),hierarchyMatrix);
     % Filter to those with annotated terms:
-    idx = find(ismember(allGOCategories,GOTable.GOID(parentIDs)));
-    % Add terms to parent
-    for k = 1:length(idx) % loop over parents
-        geneEntrezAnnotations{idx(k)} = union(geneEntrezAnnotations{idx(k)},geneEntrezAnnotations{j});
+    % idx = find(ismember(allGOCategories,GOTerms.GOID(parentIDs)));
+    % Add terms to parents:
+    for k = 1:length(parentIDs) % loop over parents
+        geneEntrezAnnotationsFull{parentIDs(k)} = union(geneEntrezAnnotationsFull{parentIDs(k)},...
+                                                            geneEntrezAnnotationsFull{j});
         % Add annotations of child to all hierarchical parents
     end
-    fprintf(1,'%u/%u\n',j,numGOCategories);
+    fprintf(1,'%u/%u\n',j,numGOCategoriesDirect);
 end
+
+%-------------------------------------------------------------------------------
+% Stats:
+%-------------------------------------------------------------------------------
+sizeGOCategories = cellfun(@length,geneEntrezAnnotationsFull);
+fprintf(1,'GO categories have between %u and %u annotations\n',min(sizeGOCategories),...
+                                        max(sizeGOCategories));
+fprintf(1,'%u GO categories have 0 annotations\n',sum(sizeGOCategories==0));
+
 
 %-------------------------------------------------------------------------------
 % Save
 hierarchyMatrix = sparse(hierarchyMatrix);
-save(fileNameSave,'annotationTable','allGOCategories','geneEntrezAnnotations','hierarchyMatrix');
+save(fileNameSave,'GOTerms','geneEntrezAnnotationsFull','hierarchyMatrix');
 fprintf(1,'Saved to %s\n',fileNameSave);
 
 end
