@@ -1,4 +1,4 @@
-function ReadDirectAnnotationFile(filePathRead)
+% function ReadDirectAnnotationFile(filePathRead)
 % Can download annotation files direct from the GO website
 % http://geneontology.org/page/download-annotations
 % Each line in the file represents a single association between a gene product
@@ -120,7 +120,11 @@ fprintf(1,' Annotated.\n');
 hasGOAnn = cellfun(@(x)~isempty(x),geneEntrezAnnotations);
 allGOCategories = allGOCategories(hasGOAnn);
 fprintf(1,'Filtered out %u GO categories with no annotations\n',sum(~hasGOAnn));
-allGOCategories = vertcat(allGOCategories{:}); % stretch out
+
+%-------------------------------------------------------------------------------
+% Convert to numbers (without the "GO:" prefix)
+toNumber = @(GOCell) cellfun(@(x)str2double(x(4:end)),GOCell,'UniformOutput',true);
+allGOCategories = toNumber(allGOCategories);
 
 %-------------------------------------------------------------------------------
 % Save to file:
@@ -128,4 +132,4 @@ fileNameSave = 'GOAnnotationDirect.mat';
 save(fileNameSave,'annotationTable','allGOCategories','geneEntrezAnnotations');
 fprintf(1,'Saved to %s\n',fileNameSave);
 
-end
+% end

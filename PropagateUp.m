@@ -1,22 +1,36 @@
-function parentIDs = PropagateUp(idHere,hierarchyMatrix,beVocal)
+function parentIDs = PropagateUp(idHere,hierarchyMatrix,beVocal,GOTerms,downInstead)
 % Start at an ID and propagate up the GO hierarchy, annotating matches on the way
 %-------------------------------------------------------------------------------
 
 % Set defaults:
 if nargin < 3
+    % Can turn on talking to check performance
     beVocal = false;
+end
+if nargin < 4
+    GOTerms = [];
+end
+if nargin < 5
+    downInstead = false;
 end
 
 %-------------------------------------------------------------------------------
-% Get parents:
-parentsHere = find(hierarchyMatrix(:,idHere));
+% Get direct parents:
+if ~downInstead
+    parentsHere = find(hierarchyMatrix(:,idHere));
+else
+    % (actually children!:)
+    parentsHere = find(hierarchyMatrix(idHere,:));
+end
 numParents = length(parentsHere);
 parentIDs = parentsHere;
+
+%-------------------------------------------------------------------------------
 if beVocal
-    fprintf(1,'--%s--\n',GOTable.GOName{idHere});
+    fprintf(1,'--%s--\n',GOTerms.GOName{idHere});
     fprintf(1,'%u parents:',numParents);
     for j = 1:numParents
-        fprintf(1,'%s, ',GOTable.GOName{parentsHere(j)});
+        fprintf(1,'%s, ',GOTerms.GOName{parentsHere(j)});
     end
     fprintf(1,'\n');
 end
@@ -31,7 +45,7 @@ else
     for j = 1:numParents
         % Give parents intersection of their annotations and child's
         % geneEntrezAnnotations(parents(j)) = intersect(geneEntrezAnnotations(parents(j)),geneEntrezAnnotations(idHere));
-        parentIDs = [parentIDs;PropagateUp(parentsHere(j),hierarchyMatrix)];
+        parentIDs = [parentIDs;PropagateUp(parentsHere(j),hierarchyMatrix,beVocal,GOTerms,downInstead)];
     end
 end
 parentIDs = unique(parentIDs);

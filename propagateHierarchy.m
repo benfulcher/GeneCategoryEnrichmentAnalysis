@@ -67,8 +67,8 @@ hierarchyRel = [vertcat(cellfun(GOtoNumber,hierarchyRel1(ix1,2))),...
 % Now filter on terms that exist in our set of BP GO terms
 yeahBP = ismember(hierarchyRel,GOTerms.GOID);
 isBP = all(yeahBP,2);
-fprintf(1,'%.2f%% of hierarchical relationships are related to our categories\n',...
-                            mean(isBP)*100);
+fprintf(1,'%.2f%% of hierarchical relationships are related to our %s categories\n',...
+                            mean(isBP)*100,whatFilter);
 hierarchyRel = hierarchyRel(isBP,:);
 numGOTerms = height(GOTerms);
 fprintf(1,'So we have %u hierachical relationships between %u GO terms\n',...
@@ -98,32 +98,33 @@ numGOCategoriesDirect = sum(isBP);
 %-------------------------------------------------------------------------------
 geneEntrezAnnotationsFull = cell(numGOTerms,1);
 ind = arrayfun(@(x)find(GOTerms.GOID==x),allGOCategoriesFiltered);
-% ind = zeros(numGOCategoriesDirect,1);
-% for i = 1:numGOCategoriesDirect
-%     tt = find(GOTerms.GOID==allGOCategoriesFiltered(i));
-%     if isempty(tt)
-%         keyboard
-%     end
-%     ind(i) = tt;
-% end
-% Add direct annotations to the necessary parts of the full set of BP categories:
 geneEntrezAnnotationsFull(ind) = geneEntrezAnnotationsFiltered;
 
 %-------------------------------------------------------------------------------
 % Propagate each directly annotated GO category up the full hierarchy:
 %-------------------------------------------------------------------------------
+beVocal = false;
 for j = 1:numGOCategoriesDirect
-    % Get parents of category using the full GO hierarchy
-    parentIDs = PropagateUp(find(GOTerms.GOID==allGOCategories(j)),hierarchyMatrix);
+    % Get parents of category (and their parents, etc.), using the full GO hierarchy:
+    theGOTermIndex = find(GOTerms.GOID==allGOCategoriesFiltered(j));
+    parentIDs = PropagateUp(theGOTermIndex,hierarchyMatrix,beVocal);
+    numHierarchicalParents = length(parentIDs);
     % Filter to those with annotated terms:
     % idx = find(ismember(allGOCategories,GOTerms.GOID(parentIDs)));
-    % Add terms to parents:
-    for k = 1:length(parentIDs) % loop over parents
+
+    % Add annotations of child to all hierarchical parents
+    for k = 1:numHierarchicalParents % loop over hierarchical parents
         geneEntrezAnnotationsFull{parentIDs(k)} = union(geneEntrezAnnotationsFull{parentIDs(k)},...
-                                                            geneEntrezAnnotationsFull{j});
-        % Add annotations of child to all hierarchical parents
+                                                            geneEntrezAnnotationsFiltered{j});
     end
-    fprintf(1,'%u/%u\n',j,numGOCategoriesDirect);
+    try
+        fprintf(1,'%u/%u: %u annotations for %s propagated up to %u parents\n',...
+                    j,numGOCategoriesDirect,...
+                    length(geneEntrezAnnotationsFiltered{j}),GOTerms.GOName{theGOTermIndex},...
+                    numHierarchicalParents);
+    catch
+        keyboard
+    end
 end
 
 %-------------------------------------------------------------------------------
