@@ -19,17 +19,14 @@ end
 numGenes = length(geneScores);
 
 % Retrieve GO annotations:
-[GOTable,geneEntrezAnnotations] = GetFilteredGOData(dataSource,processFilter,sizeFilter,geneEntrezIDs);
-sizeGOCategories = cellfun(@length,geneEntrezAnnotations);
-% Add to table:
-GOTable.size = sizeGOCategories;
+GOTable = GetFilteredGOData(dataSource,processFilter,sizeFilter,geneEntrezIDs);
 numGOCategories = height(GOTable);
 
 %-------------------------------------------------------------------------------
 % Compute the mean score for within each category:
 categoryScores = nan(numGOCategories,1);
 for j = 1:numGOCategories
-    matchMe = ismember(geneEntrezIDs,geneEntrezAnnotations{j});
+    matchMe = ismember(geneEntrezIDs,GOTable.annotations{j});
     if sum(matchMe) <= 1
         continue
     end
@@ -71,6 +68,5 @@ GOTable.meanScore = categoryScores;
 %-------------------------------------------------------------------------------
 % Sort:
 [GOTable,ix] = sortrows(GOTable,{'pVal','pVal_corr'},{'ascend','ascend'});
-geneEntrezAnnotations = geneEntrezAnnotations(ix);
 
 end

@@ -120,28 +120,27 @@ for j = 1:numGOCategoriesDirect
         geneEntrezAnnotationsFull{parentIDs(k)} = union(geneEntrezAnnotationsFull{parentIDs(k)},...
                                                             geneEntrezAnnotationsFiltered{j});
     end
-    try
-        fprintf(1,'%u/%u: %u annotations for %s propagated up to %u parents\n',...
-                    j,numGOCategoriesDirect,...
-                    length(geneEntrezAnnotationsFiltered{j}),GOTerms.GOName{theGOTermIndex},...
-                    numHierarchicalParents);
-    catch
-        keyboard
-    end
+    fprintf(1,'%u/%u: %u annotations for %s propagated up to %u parents\n',...
+                j,numGOCategoriesDirect,...
+                length(geneEntrezAnnotationsFiltered{j}),GOTerms.GOName{theGOTermIndex},...
+                numHierarchicalParents);
 end
 
 %-------------------------------------------------------------------------------
 % Stats:
 %-------------------------------------------------------------------------------
 sizeGOCategories = cellfun(@length,geneEntrezAnnotationsFull);
+GOTerms.size = sizeGOCategories; % add to table
+GOTerms.annotations = geneEntrezAnnotationsFull;
 fprintf(1,'GO categories have between %u and %u annotations\n',min(sizeGOCategories),...
                                         max(sizeGOCategories));
 fprintf(1,'%u(/%u) GO categories have 0 annotations\n',sum(sizeGOCategories==0),length(sizeGOCategories));
 
+
 %-------------------------------------------------------------------------------
 % Save
 hierarchyMatrix = sparse(hierarchyMatrix);
-save(fileNameSave,'GOTerms','geneEntrezAnnotationsFull','hierarchyMatrix');
+save(fileNameSave,'GOTerms','hierarchyMatrix');
 fprintf(1,'Saved to %s\n',fileNameSave);
 
 end

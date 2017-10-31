@@ -1,4 +1,4 @@
-function [GOTable,geneEntrezAnnotationsFull] = GetFilteredGOData(whatSource,whatFilter,sizeFilter,ourEntrez)
+function GOTable = GetFilteredGOData(whatSource,whatFilter,sizeFilter,ourEntrez)
 
 if nargin < 1
     whatSource = 'mouse-direct'; % Direct annotations from GO
@@ -27,10 +27,11 @@ case 'mouse-GEMMA'
 otherwise
     error('Unknown annotation source: ''%s''',whatSource);
 end
-load(fileNameLoad,'GOTerms','geneEntrezAnnotationsFull');
-fprintf(1,'Loaded annotations from %s\n',fileNameLoad);
+load(fileNameLoad,'GOTerms');
+fprintf(1,'Loaded annotated GO Terms from %s\n',fileNameLoad);
 
-% Get GO ontology details
+%-------------------------------------------------------------------------------
+% Get full GO ontology details:
 if strcmp(whatFilter,'biological_process') && exist('GOTerms_BP.mat','file')
     GOTermsFile = 'GOTerms_BP.mat';
     load(GOTermsFile,'GOTable');
@@ -41,42 +42,41 @@ else
 end
 
 %-------------------------------------------------------------------------------
-% Filter
+% Filter categories
 %-------------------------------------------------------------------------------
 % Filter by ontology details:
 [~,ia,ib] = intersect(GOTable.GOID,GOTerms.GOID);
 fprintf(1,'Filtering to %u annotated GO categories related to %s\n',length(ia),whatFilter);
 GOTable = GOTable(ia,:);
 GOTerms = GOTerms(ib,:);
-geneEntrezAnnotationsFull = geneEntrezAnnotationsFull(ib);
 
 % Filter by category size:
 numGOCategories = height(GOTerms);
 if isempty(ourEntrez)
     fprintf(1,'Filtering on actual annotated size of GO category\n');
-    sizeGOCategories = cellfun(@length,geneEntrezAnnotationsFull);
+    sizeGOCategories = GOTerms.size;
     fprintf(1,'%u GO categories have no annotations :-/\n',...
                     sum(sizeGOCategories==0));
 else
     fprintf(1,'Filtering on size of GO category after matching to our %u genes\n',length(ourEntrez));
     % Make sure all annotations match those in our set of entrez_ids
-    geneEntrezAnnotationsFull = cellfun(@(x)x(ismember(x,ourEntrez)),geneEntrezAnnotationsFull,...
+    GOTerms.annotations = cellfun(@(x)x(ismember(x,ourEntrez)),GOTerms.annotations,...
                                         'UniformOutput',false);
-    sizeGOCategories = cellfun(@length,geneEntrezAnnotationsFull);
+    sizeGOCategories = cellfun(@length,GOTerms.annotations);
+    GOTerms.size = sizeGOCategories;
     fprintf(1,'%u GO categories have no annotations matching our %u genes\n',...
                     sum(sizeGOCategories==0),length(ourEntrez));
 end
-GOTable.size = sizeGOCategories;
-fprintf(1,'GO categories have between %u and %u annotations\n',min(sizeGOCategories),max(sizeGOCategories));
+GOTable.size = GOTerms.size;
+GOTable.annotations = GOTerms.annotations;
+fprintf(1,'GO categories have between %u and %u annotations\n',...
+            min(sizeGOCategories),max(sizeGOCategories));
 isGoodSize = (sizeGOCategories >= sizeFilter(1)) & (sizeGOCategories <= sizeFilter(2));
 GOTable = GOTable(isGoodSize,:);
-GOTerms = GOTerms(isGoodSize,:);
-geneEntrezAnnotationsFull = geneEntrezAnnotationsFull(isGoodSize);
-sizeGOCategories = sizeGOCategories(isGoodSize);
+% GOTerms = GOTerms(isGoodSize,:);
 
 %-------------------------------------------------------------------------------
-numGOCategories = length(geneEntrezAnnotationsFull);
-fprintf(1,'Filtered to %u categories with between %u and %u annotations\n',...
-                numGOCategories,sizeFilter(1),sizeFilter(2));
+fprintf(1,'Filtered to %u GO categories with between %u and %u annotations\n',...
+                height(GOTable),sizeFilter(1),sizeFilter(2));
 
 end
