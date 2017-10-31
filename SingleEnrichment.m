@@ -1,22 +1,25 @@
-function [GOTable,geneEntrezAnnotations] = SingleEnrichment(geneScores,geneEntrezIDs,processFilter,sizeFilter,numIters)
+function [GOTable,geneEntrezAnnotations] = SingleEnrichment(geneScores,geneEntrezIDs,dataSource,processFilter,sizeFilter,numIters)
 %-------------------------------------------------------------------------------
 % Do an ermineJ style analysis for a given set of entrezIDs and scores
 %-------------------------------------------------------------------------------
 
 if nargin < 3
-    processFilter = 'biological_process';
+    dataSource = 'mouse-direct';
 end
 if nargin < 4
-    sizeFilter = [5,100];
+    processFilter = 'biological_process';
 end
 if nargin < 5
+    sizeFilter = [5,100];
+end
+if nargin < 6
     numIters = 10000;
 end
 %-------------------------------------------------------------------------------
 numGenes = length(geneScores);
 
 % Retrieve GO annotations:
-[GOTable,geneEntrezAnnotations] = GetFilteredGOData(processFilter,sizeFilter,geneEntrezIDs);
+[GOTable,geneEntrezAnnotations] = GetFilteredGOData(dataSource,processFilter,sizeFilter,geneEntrezIDs);
 sizeGOCategories = cellfun(@length,geneEntrezAnnotations);
 % Add to table:
 GOTable.size = sizeGOCategories;

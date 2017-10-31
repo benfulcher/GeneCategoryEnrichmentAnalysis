@@ -1,8 +1,8 @@
 function [GOTable,geneEntrezAnnotationsFull] = GetFilteredGOData(whatSource,whatFilter,sizeFilter,ourEntrez)
 
 if nargin < 1
-    whatSource = 'direct'; % Direct annotations from GO
-    % whatSource = 'GEMMA'; % Annotations derived from GEMMA
+    whatSource = 'mouse-direct'; % Direct annotations from GO
+    % whatSource = 'mouse-GEMMA'; % Annotations derived from GEMMA
 end
 if nargin < 2
     whatFilter = 'biological_process';
@@ -18,9 +18,11 @@ end
 % Load processed GO annotation data (i.e., direct annotations propagated up the hierarchy):
 % cf. propagateHierarchy to map files generated from ReadDirectAnnotationFile or ReadGEMMAAnnotationFile
 switch whatSource
-case 'direct'
-    fileNameLoad = sprintf('GOAnnotationDirect-%s-Prop.mat',whatFilter);
-case 'GEMMA'
+case 'mouse-direct'
+    fileNameLoad = sprintf('GOAnnotationDirect-mouse-%s-Prop.mat',whatFilter);
+case 'human-direct'
+    fileNameLoad = sprintf('GOAnnotationDirect-human-%s-Prop.mat',whatFilter);
+case 'mouse-GEMMA'
     fileNameLoad = 'GOAnnotationGEMMAProp.mat';
 otherwise
     error('Unknown annotation source: ''%s''',whatSource);

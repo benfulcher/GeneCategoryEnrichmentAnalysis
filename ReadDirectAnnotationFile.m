@@ -113,7 +113,7 @@ else
     for i = 1:numUniqueGenes
         matchMe = strcmp(geneInfo.Symbol,uniqueGeneAbbrevs{i});
         if sum(matchMe)==1
-            geneEntrez(i) = geneInfo.EntrezID(matchMe);
+            geneEntrez(i) = geneInfo.entrez_id(matchMe);
         elseif sum(matchMe) > 1
             warning('%u matches for %s?!',sum(matchMe),uniqueGeneAbbrevs{i})
         % elseif sum(matchMe==0)
