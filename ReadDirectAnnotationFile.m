@@ -1,4 +1,4 @@
-% function ReadDirectAnnotationFile(filePathRead)
+function ReadDirectAnnotationFile(whatSpecies)
 % Can download annotation files direct from the GO website
 % http://geneontology.org/page/download-annotations
 % Each line in the file represents a single association between a gene product
@@ -7,10 +7,20 @@
 %
 % This function processes these raw annotation files -> .mat file
 %-------------------------------------------------------------------------------
-% if nargin < 1
-filePathRead = 'mus_muscus_annotation.mgi';
-% end
+if nargin < 1
+    whatSpecies = 'mouse';
+end
 %-------------------------------------------------------------------------------
+
+switch whatSpecies
+case 'mouse'
+    filePathRead = 'mus_muscus_annotation.mgi';
+case 'human'
+    filePathRead = 'goa_human.gaf';
+    % File format: http://geneontology.org/page/go-annotation-file-gaf-format-21
+otherwise
+    error('Unknown data file for species: ''%s''',whatSpecies);
+end
 
 fprintf(1,'Reading data from %s...',filePathRead);
 fid = fopen(filePathRead,'r');
@@ -18,18 +28,30 @@ fid = fopen(filePathRead,'r');
 % 7.Evidence Code, 8.With/from, 9.Aspect (GO DAG: F,P,C), 10.DBObjectName,
 % 11.DBObject Synonym(s), 12.DBObject Type, 13.Taxon, 14.Date, 15.Assigned By
 % 16.Annotation Extension, 17.Gene Product Form ID
-C = textscan(fid,'%s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s','Delimiter','\t','CommentStyle','!','EndOfLine','\n');
+C = textscan(fid,'%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s',...
+                    'Delimiter','\t','CommentStyle','!','EndOfLine','\n');
 fclose(fid);
 
 % Represent as a Matlab table object (of form entrez,acronym,name,GO-annotations)
 annotationTable = table();
-annotationTable.MGI_ID = C{2};
+% switch whatSpecies
+% case 'mouse'
+%     annotationTable.MGI_ID = C{2};
+%     annotationTable.acronym = C{3};
+%     annotationTable.qualifier = categorical(C{4});
+%     annotationTable.GOID = C{5};
+%     annotationTable.evidenceCode = categorical(C{7});
+%     annotationTable.geneName = C{10};
+%     annotationTable.geneOrProtein = categorical(C{12});
+% case 'human'
+annotationTable.ID = C{2};
 annotationTable.acronym = C{3};
 annotationTable.qualifier = categorical(C{4});
-annotationTable.GO = C{5};
+annotationTable.GOID = C{5};
 annotationTable.evidenceCode = categorical(C{7});
 annotationTable.geneName = C{10};
 annotationTable.geneOrProtein = categorical(C{12});
+% end
 fprintf(1,' Data loaded\n');
 
 %-------------------------------------------------------------------------------
@@ -51,32 +73,61 @@ annotationTable = annotationTable(~isND,:);
 
 %-------------------------------------------------------------------------------
 % Organize the remaining genes:
-uniqueGenes = unique(annotationTable.MGI_ID);
+[uniqueGenes,ia] = unique(annotationTable.ID);
+uniqueGeneAbbrevs = annotationTable.acronym(ia);
 numUniqueGenes = length(uniqueGenes);
+fprintf(1,'%u genes represented in annotation table\n',numUniqueGenes);
+
+%-------------------------------------------------------------------------------
+% Do once (write out all unique UniprotIDs to retrieve mapping to NCBI gene IDs)
+% fid = fopen('allUniprotIDs.csv','w');
+% for i = 1:numUniqueGenes
+%     fprintf(fid,'%s\n',uniqueGenes{i});
+% end
+% fclose(fid);
 
 %-------------------------------------------------------------------------------
 % Map genes -> entrez IDs:
 % Load mapping (generated from mousemine: cf. MGI_NCBI_downloadall.py)
-fprintf(1,'Loading MGI->NCBI mapping from file...');
-MGI_NCBI_Map = ImportMGI_NCBI_Map(true);
-fprintf(1,' Loaded.\n');
-geneEntrez = nan(numUniqueGenes,1);
-for i = 1:numUniqueGenes
-    isHere = strcmp(MGI_NCBI_Map.MGIID,uniqueGenes{i});
-    if sum(isHere)==0
-        fprintf(1,'Nothing for %s\n',uniqueGenes{i});
-    elseif sum(isHere)==1
-        geneEntrez(i) = MGI_NCBI_Map.NCBIGeneNumber(isHere);
-    else
-        error('whoa')
+if strcmp(whatSpecies,'mouse')
+    fprintf(1,'Loading MGI->NCBI mapping from mousemine...!');
+    MGI_NCBI_Map = ImportMGI_NCBI_Map(true);
+    fprintf(1,' Loaded.\n');
+    geneEntrez = nan(numUniqueGenes,1);
+    for i = 1:numUniqueGenes
+        isHere = strcmp(MGI_NCBI_Map.MGIID,uniqueGenes{i});
+        if sum(isHere)==0
+            fprintf(1,'Nothing for %s\n',uniqueGenes{i});
+        elseif sum(isHere)==1
+            geneEntrez(i) = MGI_NCBI_Map.NCBIGeneNumber(isHere);
+        else
+            error('whoa')
+        end
     end
+else
+    fprintf(1,'No geneEntrez mapping available (yet) for %s\n',whatSpecies);
+    fprintf(1,'Mapping by symbol for now\n');
+    gParam = GiveMeDefaultParams('gene','human');
+    [~,geneInfo] = LoadMeG(gParam,'human');
+    geneEntrez = nan(numUniqueGenes,1);
+    for i = 1:numUniqueGenes
+        matchMe = strcmp(geneInfo.Symbol,uniqueGeneAbbrevs{i});
+        if sum(matchMe)==1
+            geneEntrez(i) = geneInfo.EntrezID(matchMe);
+        elseif sum(matchMe) > 1
+            warning('%u matches for %s?!',sum(matchMe),uniqueGeneAbbrevs{i})
+        % elseif sum(matchMe==0)
+            % fprintf(1,'No match for %s\n',uniqueGeneAbbrevs{i});
+        end
+    end
+    fprintf(1,'Matches found for %u genes. Good enough for now.\n',sum(~isnan(geneEntrez)));
 end
 
 %-------------------------------------------------------------------------------
 % Filter out MGI annotations for genes with no Entrez ID:
-MGI_hasNoEntrez = uniqueGenes(isnan(geneEntrez));
+hasNoEntrez = uniqueGenes(isnan(geneEntrez));
 fprintf(1,'%u genes have no Entrez ID\n',sum(isnan(geneEntrez)));
-annotationsNoEntrez = ismember(annotationTable.MGI_ID,MGI_hasNoEntrez);
+annotationsNoEntrez = ismember(annotationTable.ID,hasNoEntrez);
 fprintf(1,'%u annotations for genes/proteins with no NCBI (Entrez) ID are being ignored\n',...
                         sum(annotationsNoEntrez));
 annotationTable = annotationTable(~annotationsNoEntrez,:);
@@ -94,7 +145,7 @@ fprintf(1,'Mapping MGI IDs to Entrez IDs across the annotation table (%u genes -
                         numUniqueGenes,height(annotationTable));
 annotationEntrez = nan(height(annotationTable),1);
 for i = 1:numUniqueGenes
-    annotationsHere = strcmp(annotationTable.MGI_ID,uniqueGenes{i});
+    annotationsHere = strcmp(annotationTable.ID,uniqueGenes{i});
     annotationEntrez(annotationsHere) = geneEntrez(i);
 end
 annotationTable.EntrezID = annotationEntrez;
@@ -106,12 +157,12 @@ fprintf(1,'Hopefully %u = 0!!\n',sum(isnan(annotationTable.EntrezID)));
 %-------------------------------------------------------------------------------
 % Now get list of genes annotated to each GO category:
 % (slow because matching on strings; could convert GO IDs to integers for faster matching)
-allGOCategories = unique(annotationTable.GO);
+allGOCategories = unique(annotationTable.GOID);
 numGOCategories = length(allGOCategories);
 fprintf(1,'%u GO terms represented... Annotating to Entrez IDs...',numGOCategories);
 geneEntrezAnnotations = cell(numGOCategories,1);
 parfor i = 1:numGOCategories
-    geneEntrezAnnotations{i} = annotationTable.EntrezID(strcmp(annotationTable.GO,allGOCategories{i}));
+    geneEntrezAnnotations{i} = annotationTable.EntrezID(strcmp(annotationTable.GOID,allGOCategories{i}));
 end
 fprintf(1,' Annotated.\n');
 
@@ -128,8 +179,8 @@ allGOCategories = toNumber(allGOCategories);
 
 %-------------------------------------------------------------------------------
 % Save to file:
-fileNameSave = 'GOAnnotationDirect.mat';
+fileNameSave = sprintf('GOAnnotationDirect-%s.mat',whatSpecies);
 save(fileNameSave,'annotationTable','allGOCategories','geneEntrezAnnotations');
 fprintf(1,'Saved to %s\n',fileNameSave);
 
-% end
+end

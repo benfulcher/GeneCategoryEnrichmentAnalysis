@@ -40,12 +40,12 @@ annotationTable = table();
 annotationTable.entrez_id = C{1};
 annotationTable.acronym = C{2};
 annotationTable.name = C{3};
-annotationTable.GO = C{4};
+annotationTable.GOID = C{4};
 fprintf(1,' Data loaded\n');
 
 %-------------------------------------------------------------------------------
 % Get entrez IDs for each GO category
-allGO = annotationTable.GO;
+allGO = annotationTable.GOID;
 hasGOAnn = cellfun(@(x)~isempty(x),allGO);
 allGO = allGO(hasGOAnn);
 allEntrez = annotationTable.entrez_id(hasGOAnn);
