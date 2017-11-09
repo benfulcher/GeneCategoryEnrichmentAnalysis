@@ -1,8 +1,7 @@
-function [GOTable,geneEntrezAnnotations] = SingleEnrichment(geneScores,geneEntrezIDs,dataSource,processFilter,sizeFilter,numIters)
+function GOTable = SingleEnrichment(geneScores,geneEntrezIDs,dataSource,processFilter,sizeFilter,numIters)
 %-------------------------------------------------------------------------------
 % Do an ermineJ style analysis for a given set of entrezIDs and scores
 %-------------------------------------------------------------------------------
-
 if nargin < 3
     dataSource = 'mouse-direct';
 end
@@ -35,7 +34,7 @@ end
 
 %-------------------------------------------------------------------------------
 % Generate a null distribution
-uniqueSizes = unique(sizeGOCategories);
+uniqueSizes = unique(GOTable.size);
 numSizes = length(uniqueSizes);
 nullDistribution = zeros(numSizes,numIters);
 fprintf(1,'Gene score reasmpling for %u iterations across %u category sizes (%u-%u)\n',...
@@ -52,7 +51,7 @@ end
 pVals = zeros(numGOCategories,1);
 parfor i = 1:numGOCategories
     % Bigger is better:
-    pVals(i) = mean(categoryScores(i) < nullDistribution(uniqueSizes==sizeGOCategories(i),:));
+    pVals(i) = mean(categoryScores(i) < nullDistribution(uniqueSizes==GOTable.size(i),:));
 end
 
 %-------------------------------------------------------------------------------
