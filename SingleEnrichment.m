@@ -15,11 +15,18 @@ if nargin < 6
     numIters = 10000;
 end
 %-------------------------------------------------------------------------------
+if length(geneScores)~=length(geneEntrezIDs)
+    error('Inconsistent numbers of genes scored (%u) and with entrez IDs provided (%u)',...
+                        length(geneScores),length(geneEntrezIDs));
+end
 numGenes = length(geneScores);
 
 % Retrieve GO annotations:
 GOTable = GetFilteredGOData(dataSource,processFilter,sizeFilter,geneEntrezIDs);
 numGOCategories = height(GOTable);
+if all(GOTable.size==0)
+    error('No annotations found in %s after applying filters',dataSource);
+end
 
 %-------------------------------------------------------------------------------
 % Compute the mean score for within each category:
@@ -51,7 +58,11 @@ end
 pVals = zeros(numGOCategories,1);
 parfor i = 1:numGOCategories
     % Bigger is better:
-    pVals(i) = mean(categoryScores(i) < nullDistribution(uniqueSizes==GOTable.size(i),:));
+    if isnan(categoryScores(i))
+        pVals(i) = NaN;
+    else
+        pVals(i) = mean(categoryScores(i) < nullDistribution(uniqueSizes==GOTable.size(i),:));
+    end
 end
 
 %-------------------------------------------------------------------------------
@@ -61,11 +72,11 @@ pVals_corr = mafdr(pVals,'BHFDR','true');
 %-------------------------------------------------------------------------------
 % Update the GO table:
 GOTable.pVal = pVals;
-GOTable.pVal_corr = pVals_corr;
+GOTable.pValCorr = pVals_corr;
 GOTable.meanScore = categoryScores;
 
 %-------------------------------------------------------------------------------
 % Sort:
-[GOTable,ix] = sortrows(GOTable,{'pVal','pVal_corr'},{'ascend','ascend'});
+[GOTable,ix] = sortrows(GOTable,{'pVal','pValCorr'},{'ascend','ascend'});
 
 end
