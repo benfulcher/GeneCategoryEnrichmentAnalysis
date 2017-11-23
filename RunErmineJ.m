@@ -69,8 +69,8 @@ end
 ermineJResults = ReadInErmineJ(outputFile);
 
 % Write out to screen:
-fisSig_005 = find(ermineJResults.pVal_corr < 0.05);
-fisSig_01 = find(ermineJResults.pVal_corr>=0.05 & ermineJResults.pVal_corr < 0.1);
+fisSig_005 = find(ermineJResults.pValCorr < 0.05);
+fisSig_01 = find(ermineJResults.pValCorr>=0.05 & ermineJResults.pValCorr < 0.1);
 numSig_005 = length(fisSig_005);
 numSig_01 = length(fisSig_01);
 if numSig_01==0 && numSig_005==0
@@ -80,14 +80,14 @@ else
     % The FDR 0.05 club:
     for i = 1:numSig_005
         fprintf(1,'%s (%s) [p=%.2g]\n',ermineJResults.GOName{fisSig_005(i)},...
-                    ermineJResults.GOID{fisSig_005(i)},ermineJResults.pVal_corr(fisSig_005(i)));
+                    ermineJResults.GOID{fisSig_005(i)},ermineJResults.pValCorr(fisSig_005(i)));
     end
     % What about outside contenders:
     if numSig_01 > 0
         fprintf(1,'--------\n');
         for i = 1:numSig_01
             fprintf(1,'%s (%s) [p=%.2g]\n',ermineJResults.GOName{fisSig_01(i)},...
-                        ermineJResults.GOID{fisSig_01(i)},ermineJResults.pVal_corr(fisSig_01(i)));
+                        ermineJResults.GOID{fisSig_01(i)},ermineJResults.pValCorr(fisSig_01(i)));
         end
     end
 end

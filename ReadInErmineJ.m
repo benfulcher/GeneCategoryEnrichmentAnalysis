@@ -1,15 +1,15 @@
 function ermineJResults = ReadInErmineJ(fileNameIn,fileNameMatch)
 % ------------------------------------------------------------------------------
-% Ben Fulcher, 2014-12-10
+% Reads in an ermineJ output file to Matlab
 % ------------------------------------------------------------------------------
 
 % ------------------------------------------------------------------------------
 % Check inputs:
 %-------------------------------------------------------------------------------
 if nargin < 2
-    matchFileName = 0;
+    matchFileName = false;
 else
-    matchFileName = 1;
+    matchFileName = true;
 end
 % ------------------------------------------------------------------------------
 
@@ -80,7 +80,7 @@ ermineJResults.GOName = data1{2};
 ermineJResults.GOID = data1{3};
 ermineJResults.numGenes = data1{5};
 ermineJResults.pVal = data1{7};
-ermineJResults.pVal_corr = data1{8};
+ermineJResults.pValCorr = data1{8};
 ermineJResults.geneMembers = data1{13};
 
 % GOName = data1{2};
