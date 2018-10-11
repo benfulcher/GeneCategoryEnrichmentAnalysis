@@ -12,7 +12,7 @@ if nargin < 5
     sizeFilter = [5,100];
 end
 if nargin < 6
-    numIters = 10000;
+    numIters = 1e4;
 end
 %-------------------------------------------------------------------------------
 if length(geneScores)~=length(geneEntrezIDs)
