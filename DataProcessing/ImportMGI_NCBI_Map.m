@@ -77,7 +77,6 @@ end
 rawNumericColumns = raw(:, 2);
 rawCellColumns = raw(:, [1,3]);
 
-
 %% Replace non-numeric cells with NaN
 R = cellfun(@(x) ~isnumeric(x) && ~islogical(x),rawNumericColumns); % Find non-numeric cells
 rawNumericColumns(R) = {NaN}; % Replace non-numeric cells

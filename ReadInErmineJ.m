@@ -1,7 +1,5 @@
 function ermineJResults = ReadInErmineJ(fileNameIn,fileNameMatch)
-% ------------------------------------------------------------------------------
-% Reads in an ermineJ output file to Matlab
-% ------------------------------------------------------------------------------
+% Read in an ermineJ output file
 
 % ------------------------------------------------------------------------------
 % Check inputs:

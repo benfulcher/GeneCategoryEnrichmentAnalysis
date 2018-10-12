@@ -1,6 +1,6 @@
 function GOTable = GetGOTerms(whatFilter)
 % From a mySQL database, retrieves GO terms for a given process
-% e.g., GOTerms = GetGoTerms('biological_process');
+% e.g., GOTerms = GetGOTerms('biological_process');
 %-------------------------------------------------------------------------------
 
 if nargin < 1

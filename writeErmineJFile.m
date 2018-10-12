@@ -1,6 +1,5 @@
 function filePath = writeErmineJFile(whatData,geneMeasures,theGeneEntrez,columnName)
 % Writes a tab-delimited input file for ermineJ
-% Ben Fulcher, 2014-10-14
 % ------------------------------------------------------------------------------
 
 if nargin < 4
@@ -21,13 +20,12 @@ end
 fid = fopen(filePath,'w');
 numGenes = length(theGeneEntrez);
 
-% 1. The header
+% Header
 fprintf(fid,'%s\t%s\n','Gene',columnName);
 
-% 2. The gene list with p-values.
+% Gene list with p-values
 for i = 1:numGenes
     fprintf(fid,'%u\t%.8g\n',theGeneEntrez(i),geneMeasures(i));
-    % fprintf(fid,'%s\t%f\n',theGeneStruct(i).gene_acronym,meanP(i));
 end
 
 fclose(fid);

@@ -1,5 +1,5 @@
 function [summaryTable,allGOLabels,allGONames,allGOIDs,ix_runs] = PrepareSummaryTable(enrichmentTables,doReorder)
-% Takes in enrichment tables from RunErmineJ
+% Combines a range of enrichment tables (e.g., from RunErmineJ)
 %-------------------------------------------------------------------------------
 
 if nargin < 2

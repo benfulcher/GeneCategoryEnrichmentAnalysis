@@ -1,6 +1,8 @@
+% checkConsistency: check how consistent results are from our random-gene null
+% enrichment method, and ermineJ's enrichment results
+%-------------------------------------------------------------------------------
 
 
-% [GOTable,geneEntrezAnnotations] = GetFilteredGOData('biological_process',[0,1000]);
 [GOTable,geneEntrezAnnotations] = GetFilteredGOData('biological_process',[0,100],geneEntrezIDs);
 
 i = 3;
