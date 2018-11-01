@@ -6,7 +6,7 @@ numSizes = length(uniqueSizes);
 numGenes = length(geneScores);
 
 nullDistribution = zeros(numSizes,numSamples);
-for j = 1:numSamples
+parfor j = 1:numSamples
     rp = randperm(numGenes);
     for i = 1:numSizes
         nullDistribution(i,j) = nanmean(geneScores(rp(1:uniqueSizes(i))));

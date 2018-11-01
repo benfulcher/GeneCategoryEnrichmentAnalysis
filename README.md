@@ -28,11 +28,17 @@ This analysis considers a null model in which scores can be assigned to individu
 INPUTS:
 * `geneScores`, a numGenes-long column vector of values that quantifies something about each gene.
 * `geneEntrezIDs`, numGenes-long column vector labeling the entrez ID for each gene in geneScores.
+Extra options set as fields in a parameter structure:
 * `dataSource`, specifies the source of GO annotations, to be loaded using `GetFilteredGOData`. Options are `mouse-direct` (hierarchy and annotations taken directly from GO), `human-direct` (hierarchy and annotations taken directly from GO), `mouse-GEMMA` (processed hierarchy and annotations downloaded from GEMMA).
 * `processFilter`, what GO processes to consider. Default is `biological_process`.
 * `sizeFilter`, filter GO categories by size. Default is `[5,200]` (only consider categories with between 5 and 200 annotations).
-* `numIters`, number of iterations (`1e4` is the default, can ramp up to get better significance estimates for small p-values).
+* `numSamples`, number of iterations (`1e4` is the default, can ramp up to get better significance estimates for small p-values).
 
 ```matlab
-GOTable = SingleEnrichment(geneScores,geneEntrezIDs,dataSource,processFilter,sizeFilter,numIters)
+enrichmentSettings = struct();
+enrichmentSettings.dataSource = 'mouse-direct';
+enrichmentSettings.processFilter = 'biological_process';
+enrichmentSettings.sizeFilter = [5,100];
+enrichmentSettings.numSamples = 1e4;
+GOTable = SingleEnrichment(geneScores,geneEntrezIDs,enrichmentSettings);
 ```
