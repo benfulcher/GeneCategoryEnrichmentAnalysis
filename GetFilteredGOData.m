@@ -1,5 +1,9 @@
 function GOTable = GetFilteredGOData(whatSource,whatFilter,sizeFilter,ourEntrez)
+% Returns a GO table of gene annotations
+%-------------------------------------------------------------------------------
 
+%-------------------------------------------------------------------------------
+% Check Inputs:
 if nargin < 1
     whatSource = 'mouse-direct'; % Direct annotations from GO
     % whatSource = 'mouse-GEMMA'; % Annotations derived from GEMMA
@@ -67,6 +71,7 @@ else
     fprintf(1,'%u GO categories have no annotations matching our %u genes\n',...
                     sum(sizeGOCategories==0),length(ourEntrez));
 end
+
 GOTable.size = GOTerms.size;
 GOTable.annotations = GOTerms.annotations;
 fprintf(1,'GO categories have between %u and %u annotations\n',...
@@ -74,8 +79,6 @@ fprintf(1,'GO categories have between %u and %u annotations\n',...
 isGoodSize = (sizeGOCategories >= sizeFilter(1)) & (sizeGOCategories <= sizeFilter(2));
 GOTable = GOTable(isGoodSize,:);
 % GOTerms = GOTerms(isGoodSize,:);
-
-%-------------------------------------------------------------------------------
 fprintf(1,'Filtered to %u GO categories with between %u and %u annotations\n',...
                 height(GOTable),sizeFilter(1),sizeFilter(2));
 
