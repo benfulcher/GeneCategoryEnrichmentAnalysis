@@ -2,13 +2,22 @@ function GOTable = SingleEnrichment(geneScores,geneEntrezIDs,params);
 % Enrichment under a random-gene null
 %
 %---INPUTS:
-% * `geneScores`, a numGenes-long column vector of values that quantifies something about each gene.
-% * `geneEntrezIDs`, numGenes-long column vector labeling the entrez ID for each gene in geneScores.
-% * `params` structure with the following fields:
-%     - `dataSource`, specifies the source of GO annotations, to be loaded using `GetFilteredGOData`. Options are `mouse-direct` (hierarchy and annotations taken directly from GO), `human-direct` (hierarchy and annotations taken directly from GO), `mouse-GEMMA` (processed hierarchy and annotations downloaded from GEMMA).
-%     - `processFilter`, what GO processes to consider. Default is `biological_process`.
-%     - `sizeFilter`, filter GO categories by size. Default is `[5,200]` (only consider categories with between 5 and 200 annotations).
-%     - `numSamples`, number of permutation iterations for null (`1e4` is the default, can ramp up to get better significance estimates for small p-values).
+% * geneScores, a numGenes-long column vector of values that quantifies
+%               something about each gene.
+% * geneEntrezIDs, numGenes-long column vector labeling the entrez ID for each
+%                  gene in geneScores.
+% * params, structure with the following fields:
+%     - dataSource, specifies the source of GO annotations, to be loaded using
+%                   `GetFilteredGOData`. Options are `mouse-direct` (hierarchy
+%                   and annotations taken directly from GO), `human-direct`
+%                   (hierarchy and annotations taken directly from GO),
+%                   `mouse-GEMMA` (processed hierarchy and annotations
+%                   downloaded from GEMMA).
+%     - processFilter, what GO processes to consider. Default: `biological_process`.
+%     - sizeFilter, filter GO categories by size. Default: `[5,200]`
+%                   (i.e., consider categories with between 5 and 200 annotations).
+%     - numSamples, number of permutation iterations for null. Default: 1e4.
+%                   Can ramp up to get better significance estimates for small p-values).
 %-------------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------------
@@ -64,26 +73,31 @@ nullDistribution = PermuteForNullDistributions(geneScores,uniqueSizes,numSamples
 
 %-------------------------------------------------------------------------------
 % Compute p-values (bigger scores are better)
-pVal = nan(numGOCategories,1);
+pVal = nan(numGOCategories,1); % Discrete, count-based estimate
+pValZ = nan(numGOCategories,1); % Gaussian approximation
 parfor i = 1:numGOCategories
     if ~isnan(categoryScores(i))
         nullForSize = nullDistribution(GOTable.size(i)==uniqueSizes,:);
         pVal(i) = mean(categoryScores(i) < nullForSize);
+        pValZ(i) = 1 - normcdf(categoryScores(i),mean(nullForSize),std(nullForSize));
     end
 end
 
 %-------------------------------------------------------------------------------
 % FDR correct:
 pValCorr = mafdr(pVal,'BHFDR','true');
+pValZCorr = mafdr(pValZ,'BHFDR','true');
 
 %-------------------------------------------------------------------------------
 % Update the GO table:
 GOTable.meanScore = categoryScores;
 GOTable.pVal = pVal;
+GOTable.pValZ = pValZ;
 GOTable.pValCorr = pValCorr;
+GOTable.pValZCorr = pValZCorr;
 
 %-------------------------------------------------------------------------------
 % Sort:
-GOTable = sortrows(GOTable,{'pVal','pValCorr'},{'ascend','ascend'});
+GOTable = sortrows(GOTable,{'pVal','pValZ'},{'ascend','ascend'});
 
 end
