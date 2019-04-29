@@ -21,6 +21,7 @@ if doGEMMA && strcmp(whatSpecies,'mouse')
 else
     fileNameLoad = sprintf('GOAnnotationDirect-%s.mat',whatSpecies);
     fileNameSave = sprintf('GOAnnotationDirect-%s-%s-Prop.mat',whatSpecies,whatFilter);
+    fileNameSave = fullfile('ProcessedData',fileNameSave);
 end
 
 load(fileNameLoad,'allGOCategories','geneEntrezAnnotations');
@@ -31,11 +32,7 @@ GOTerms = GetGOTerms(whatFilter);
 %-------------------------------------------------------------------------------
 % mySQL query for hierarchy:
 %-------------------------------------------------------------------------------
-connSettings.hostname = 'localhost:1234';
-connSettings.dbname = 'GODaily';
-connSettings.username = 'benfulcher';
-connSettings.password = 'ben';
-dbc = SQL_opendatabase(connSettings);
+dbc = ConnectMeDatabase();
 
 % e.g., Get all biological_process-tagged GO categories
 % selectText = sprintf('SELECT term1_id,term2_id FROM term2term WHERE relationship_type_id = 1');

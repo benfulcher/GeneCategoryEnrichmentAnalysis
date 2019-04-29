@@ -12,13 +12,44 @@ Assumes you have an SQL database setup, with details entered into `GetGOTerms`
 
 Get biological process GO terms:
 ```matlab
-GOTerms = GetGOTerms('biological_process')
+GOTerms = GetGOTerms('biological_process');
 ```
 
-### Generating formatted files processing raw GO annotations
+### Generating formatted files for Matlab, processed from raw GO annotations
 
-* `ReadDirectAnnotationFile` to read in raw annotations from GO (or `ReadGEMMAAnnotationFile` to read in processed annotations from GEMMA)
-* `propagateHierarchy` to propagate annotations up the hierarchy
+#### Downloading GO term hierarchy information
+
+[Downloading the GO Term hierarchy](http://geneontology.org/page/download-ontology) has a number of routes.
+The data is provided in raw form as `go-basic.obo` (`basic` file ensures that annotations can be propagated), but you can also download it as a [database](ftp://ftp.geneontology.org/go/www/GO.downloads.database.shtml).
+We have used the **termdb** [mySQL database dump](http://archive.geneontology.org/latest-termdb/go_daily-termdb-tables.tar.gz).
+
+
+#### Downloading raw GO annotation data
+
+You can download annotation files direct from the [GO website](http://current.geneontology.org/products/pages/downloads.html).
+For _Mus musculus_, this yields: `mgi.gaf`.
+For human, it is: `goa_human.gaf`.
+
+#### Read in from the GO annotation file:
+```matlab
+ReadDirectAnnotationFile
+```
+Alternative is to use `ReadGEMMAAnnotationFile` to read in processed annotations from GEMMA.
+
+Saves processed data in the form `GOAnnotationDirect-mouse.mat`, in the `ProcessedData` directory.
+
+#### Propagate annotations up through the hierarchy
+Annotations are made at the lowest level of the GO term hierarchy.
+It therefore makes sense to propagate direct annotations up to all the parent terms.
+This can be achieved using:
+
+```matlab
+propagateHierarchy('mouse','biological_process');
+```
+Loads in from the previous step (e.g., `GOAnnotationDirect-mouse.mat`) and saves output as `GOAnnotationDirect-mouse-biological_process-Prop.mat`.
+This information can then be read in for enrichment or other analyses.
+
+Note that this script requires access to a mySQL database containing the hierarchical GO term information.
 
 ## Analyses
 ### Conventional enrichment using `SingleEnrichment`

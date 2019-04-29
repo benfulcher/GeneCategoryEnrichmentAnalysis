@@ -163,6 +163,8 @@ fprintf(1,'%u GO terms represented... Annotating to Entrez IDs...',numGOCategori
 geneEntrezAnnotations = cell(numGOCategories,1);
 parfor i = 1:numGOCategories
     geneEntrezAnnotations{i} = annotationTable.EntrezID(strcmp(annotationTable.GOID,allGOCategories{i}));
+    % Don't include duplicates:
+    geneEntrezAnnotations{i} = unique(geneEntrezAnnotations{i});
 end
 fprintf(1,' Annotated.\n');
 
@@ -180,6 +182,7 @@ allGOCategories = toNumber(allGOCategories);
 %-------------------------------------------------------------------------------
 % Save to file:
 fileNameSave = sprintf('GOAnnotationDirect-%s.mat',whatSpecies);
+fileNameSave = fullfile('ProcessedData',fileNameSave);
 save(fileNameSave,'annotationTable','allGOCategories','geneEntrezAnnotations');
 fprintf(1,'Saved to %s\n',fileNameSave);
 
