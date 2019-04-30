@@ -10,33 +10,34 @@ Some information and usage examples are below:
 
 Assumes you have an SQL database setup, with details entered into `GetGOTerms`
 
-Get biological process GO terms:
+Get biological process GO terms and save the filtered set of GO terms to file:
 ```matlab
-GOTerms = GetGOTerms('biological_process');
+GOTerms = GetGOTerms('biological_process',true);
 ```
+Saves out to `ProcessedData/GOTerms_BP.mat`.
 
 ### Generating formatted files for Matlab, processed from raw GO annotations
 
 #### Downloading GO term hierarchy information
 
 [Downloading the GO Term hierarchy](http://geneontology.org/page/download-ontology) has a number of routes.
+We used the **termdb** [mySQL database dump](http://archive.geneontology.org/latest-termdb/go_daily-termdb-tables.tar.gz), and link to this database using a mySQL java connector.
 The data is provided in raw form as `go-basic.obo` (`basic` file ensures that annotations can be propagated), but you can also download it as a [database](ftp://ftp.geneontology.org/go/www/GO.downloads.database.shtml).
-We have used the **termdb** [mySQL database dump](http://archive.geneontology.org/latest-termdb/go_daily-termdb-tables.tar.gz).
-
 
 #### Downloading raw GO annotation data
 
 You can download annotation files direct from the [GO website](http://current.geneontology.org/products/pages/downloads.html).
 For _Mus musculus_, this yields: `mgi.gaf`.
-For human, it is: `goa_human.gaf`.
+For _Homo sapiens_, it is: `goa_human.gaf`.
+Data used here is from the 2019-04-17 release.
 
 #### Read in from the GO annotation file:
 ```matlab
-ReadDirectAnnotationFile
+ReadDirectAnnotationFile('mouse')
 ```
-Alternative is to use `ReadGEMMAAnnotationFile` to read in processed annotations from GEMMA.
-
 Saves processed data in the form `GOAnnotationDirect-mouse.mat`, in the `ProcessedData` directory.
+
+Note that processed annotations from [GEMMA](https://gemma.msl.ubc.ca/annots/) can alternatively be read in using `ReadGEMMAAnnotationFile`.
 
 #### Propagate annotations up through the hierarchy
 Annotations are made at the lowest level of the GO term hierarchy.

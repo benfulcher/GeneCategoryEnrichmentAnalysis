@@ -105,13 +105,15 @@ if strcmp(whatSpecies,'mouse')
         end
     end
 else
-    fprintf(1,'No geneEntrez mapping available (yet) for %s\n',whatSpecies);
-    fprintf(1,'Mapping by symbol for now\n');
-    gParam = GiveMeDefaultParams('gene','human');
-    [~,geneInfo] = LoadMeG(gParam,'human');
+    fprintf(1,'No geneEntrez mapping implemented for %s (yet)\n',whatSpecies);
+    fprintf(1,'Mapping by symbol for now...\n');
+    warning('Requires MouseEdge repository to access human gene information')
+    % Get expression data from https://github.com/benfulcher/MouseEdge:
+    params = GiveMeDefaultParams('human');
+    [~,geneInfo] = LoadMeG(params.g);
     geneEntrez = nan(numUniqueGenes,1);
     for i = 1:numUniqueGenes
-        matchMe = strcmp(geneInfo.Symbol,uniqueGeneAbbrevs{i});
+        matchMe = strcmp(geneInfo.acronym,uniqueGeneAbbrevs{i});
         if sum(matchMe)==1
             geneEntrez(i) = geneInfo.entrez_id(matchMe);
         elseif sum(matchMe) > 1
@@ -120,7 +122,7 @@ else
             % fprintf(1,'No match for %s\n',uniqueGeneAbbrevs{i});
         end
     end
-    fprintf(1,'Matches found for %u genes. Good enough for now.\n',sum(~isnan(geneEntrez)));
+    fprintf(1,'Matches found for %u/%u genes.\n',sum(~isnan(geneEntrez)),numUniqueGenes);
 end
 
 %-------------------------------------------------------------------------------

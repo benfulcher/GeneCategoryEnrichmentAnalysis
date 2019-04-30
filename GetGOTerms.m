@@ -1,4 +1,4 @@
-function GOTable = GetGOTerms(whatFilter)
+function GOTable = GetGOTerms(whatFilter,doSave)
 % From a mySQL database, retrieves GO terms for a given process
 % e.g., GOTerms = GetGOTerms('biological_process');
 %-------------------------------------------------------------------------------
@@ -6,6 +6,10 @@ function GOTable = GetGOTerms(whatFilter)
 if nargin < 1
     whatFilter = 'biological_process';
 end
+if nargin < 2
+    doSave = false;
+end
+%-------------------------------------------------------------------------------
 
 dbc = ConnectMeDatabase();
 
@@ -28,5 +32,18 @@ GOTable.GOID = cellfun(@(x)str2num(x(4:end)),GOTable.GOIDlabel);
 
 % Sort:
 GOTable = sortrows(GOTable,'GOID');
+
+%===============================================================================
+% Save to file
+if doSave
+    if strcmp(whatFilter,'biological_process')
+        GOTermFile = fullfile('ProcessedData','GOTerms_BP.mat');
+        save(GOTermFile,'GOTable');
+        fprintf(1,'Saved filtered GO table to %s\n',GOTermFile);
+    else
+        fprintf(1,'Don''t know how to save data that isn''t a simple BP filter...\n');
+    end
+end
+
 
 end

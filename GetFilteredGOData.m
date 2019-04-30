@@ -36,8 +36,8 @@ fprintf(1,'Loaded annotated GO Terms from %s\n',fileNameLoad);
 
 %-------------------------------------------------------------------------------
 % Get full GO ontology details:
-if strcmp(whatFilter,'biological_process') && exist('GOTerms_BP.mat','file')
-    GOTermsFile = 'GOTerms_BP.mat';
+GOTermsFile = 'GOTerms_BP.mat';
+if strcmp(whatFilter,'biological_process') && exist(GOTermsFile,'file')
     load(GOTermsFile,'GOTable');
     fprintf(1,'Loaded biological process GO terms from %s\n',GOTermsFile);
 else
