@@ -1,5 +1,5 @@
 function propagateHierarchy(whatSpecies,whatFilter,doGEMMA)
-% Process raw annotation data by propagating up the GO term hierarchy
+% Process raw annotation data by propagating up the GO-term hierarchy
 % That is, parent terms inherit annotations to their children
 %-------------------------------------------------------------------------------
 

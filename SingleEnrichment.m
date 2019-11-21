@@ -69,11 +69,11 @@ end
 %-------------------------------------------------------------------------------
 % Generate a null distribution (through permutation testing) for each category size
 nullDistribution = PermuteForNullDistributions(geneScores,uniqueSizes,numSamples);
-% numSizes x numSamples
+% nullDistribution: numSizes x numSamples
 
 %-------------------------------------------------------------------------------
 % Compute p-values (bigger scores are better)
-pVal = nan(numGOCategories,1); % Discrete, count-based estimate
+pVal = nan(numGOCategories,1); % Discrete, count-based estimate from size-stratified permutation
 pValZ = nan(numGOCategories,1); % Gaussian approximation
 parfor i = 1:numGOCategories
     if ~isnan(categoryScores(i))
@@ -84,20 +84,20 @@ parfor i = 1:numGOCategories
 end
 
 %-------------------------------------------------------------------------------
-% FDR correct:
+% FDR 'correction' to both methods of estimating p-values:
 pValCorr = mafdr(pVal,'BHFDR','true');
 pValZCorr = mafdr(pValZ,'BHFDR','true');
 
 %-------------------------------------------------------------------------------
 % Update the GO table:
 GOTable.meanScore = categoryScores;
-GOTable.pVal = pVal;
-GOTable.pValZ = pValZ;
-GOTable.pValCorr = pValCorr;
+GOTable.pValZ = pValZ; % Estimated p-value from Gaussian approximation to null
+GOTable.pValPerm = pVal; % Permutation test
 GOTable.pValZCorr = pValZCorr;
+GOTable.pValPermCorr = pValCorr;
 
 %-------------------------------------------------------------------------------
 % Sort:
-GOTable = sortrows(GOTable,{'pVal','pValZ'},{'ascend','ascend'});
+GOTable = sortrows(GOTable,{'pValPerm','pValZ'},{'ascend','ascend'});
 
 end

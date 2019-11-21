@@ -90,7 +90,7 @@ fprintf(1,'%u genes represented in annotation table\n',numUniqueGenes);
 % Map genes -> entrez IDs:
 % Load mapping (generated from mousemine: cf. MGI_NCBI_downloadall.py)
 if strcmp(whatSpecies,'mouse')
-    fprintf(1,'Loading MGI->NCBI mapping from mousemine...!');
+    fprintf(1,'Loading MGI -> NCBI mapping from mousemine...!');
     MGI_NCBI_Map = ImportMGI_NCBI_Map(true);
     fprintf(1,' Loaded.\n');
     geneEntrez = nan(numUniqueGenes,1);
