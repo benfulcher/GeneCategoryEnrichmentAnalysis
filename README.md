@@ -1,14 +1,31 @@
-# Gene Enrichment
+# Gene Set Enrichment Analysis by Gene Score Resampling
 
-This is a Matlab repository for performing gene ontology enrichment given a set of gene scores.
+This is a Matlab repository for performing Gene Set Enrichment Analysis (GSEA) on Gene Ontology (GO) Terms.
+Given a set of scores assigned to genes, we use the permutation-based method of Gene Score Resampling (GSR), following the [*ermineJ*](https://erminej.msl.ubc.ca/) software package.
+The package supports conventional enrichment, which generates a null distribution for some summary statistic across the scores assigned to genes annotated to a given GO Term by randomizing the assignment of genes to GO categories.
+These null distributions depend on the size of the GO Category.
 
-Some information and usage examples are below:
+There are two steps in performing an analysis:
+1. Initialize the package with the latest GO hierarchy and gene annotations (or download processed results from [figshare](https://figshare.com/s/71fe1d9b2386ec05f421)).
+2. Run an enrichment analysis.
 
-## Data Processing
+## Initialization
 
-### Retrieving GO Terms
+We first describe how to retrieve and process data from GO in a form that facilitates GSEA.
+Note that this step can be skipped by downloading pre-processed results from [figshare](https://figshare.com/s/71fe1d9b2386ec05f421).
 
-Assumes you have an SQL database setup, with details entered into `GetGOTerms`
+This involves the following steps:
+1. Retrieve and process the GO hierarchy data.
+2. Retrieve and process the annotations of genes to GO Terms.
+3. Iteratively propagate gene-to-Term annotations from child to parent up the GO hierarchy.
+
+### Retrieving the GO-Term Hierarchy
+There are a number of routes to [downloading the GO Term hierarchy](http://geneontology.org/page/download-ontology).
+We used the **termdb** [mySQL database dump](http://archive.geneontology.org/latest-termdb/go_daily-termdb-tables.tar.gz), and link to this database using a mySQL java connector, as implemented in the [Matlab_mySQL repository](https://github.com/benfulcher/Matlab_mySQL).
+
+The data is provided in raw form as `go-basic.obo` (`basic` file ensures that annotations can be propagated), and you can also download it as a [database](ftp://ftp.geneontology.org/go/www/GO.downloads.database.shtml).
+
+Assumes you have an SQL database setup, with details entered into `GetGOTerms`.
 
 Get biological process GO terms and save the filtered set of GO terms to file:
 ```matlab
@@ -18,11 +35,7 @@ Saves out to `ProcessedData/GOTerms_BP.mat`.
 
 ### Generating formatted files for Matlab, processed from raw GO annotations
 
-#### Downloading GO term hierarchy information
 
-[Downloading the GO Term hierarchy](http://geneontology.org/page/download-ontology) has a number of routes.
-We used the **termdb** [mySQL database dump](http://archive.geneontology.org/latest-termdb/go_daily-termdb-tables.tar.gz), and link to this database using a mySQL java connector.
-The data is provided in raw form as `go-basic.obo` (`basic` file ensures that annotations can be propagated), but you can also download it as a [database](ftp://ftp.geneontology.org/go/www/GO.downloads.database.shtml).
 
 #### Downloading raw GO annotation data
 
