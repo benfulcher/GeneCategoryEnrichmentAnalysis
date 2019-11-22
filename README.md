@@ -135,3 +135,7 @@ propagateHierarchy('mouse','biological_process');
 ```
 The code takes processed data (e.g., `GOAnnotationDirect-mouse.mat`) and saves propagated output as `GOAnnotationDirect-mouse-biological_process-Prop.mat`.
 These propagated annotations can then be used for enrichment analysis.
+
+## Related Resources
+
+Run GO enrichment in python using [goenrich](https://github.com/jdrudolph/goenrich).
