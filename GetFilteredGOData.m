@@ -1,5 +1,5 @@
 function GOTable = GetFilteredGOData(whatSource,whatFilter,sizeFilter,ourEntrez)
-% Returns a GO table of gene annotations
+% GetFilteredGOData       Returns a GO table of gene annotations
 %-------------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------------
@@ -78,7 +78,6 @@ fprintf(1,'GO categories have between %u and %u annotations\n',...
             min(sizeGOCategories),max(sizeGOCategories));
 isGoodSize = (sizeGOCategories >= sizeFilter(1)) & (sizeGOCategories <= sizeFilter(2));
 GOTable = GOTable(isGoodSize,:);
-% GOTerms = GOTerms(isGoodSize,:);
 fprintf(1,'Filtered to %u GO categories with between %u and %u annotations\n',...
                 height(GOTable),sizeFilter(1),sizeFilter(2));
 

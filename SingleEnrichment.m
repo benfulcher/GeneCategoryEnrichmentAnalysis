@@ -6,7 +6,7 @@ function GOTable = SingleEnrichment(geneScores,geneEntrezIDs,params);
 %               something about each gene.
 % * geneEntrezIDs, numGenes-long column vector labeling the entrez ID for each
 %                  gene in geneScores.
-% * params, structure with the following fields:
+% * params, a structure with the following fields:
 %     - dataSource, specifies the source of GO annotations, to be loaded using
 %                   `GetFilteredGOData`. Options are `mouse-direct` (hierarchy
 %                   and annotations taken directly from GO), `human-direct`
@@ -26,7 +26,7 @@ if nargin < 3
     params = struct();
     params.dataSource = 'mouse-direct';
     params.processFilter = 'biological_process';
-    params.sizeFilter = [5,100];
+    params.sizeFilter = [5,200];
     params.numSamples = 1e4;
 end
 

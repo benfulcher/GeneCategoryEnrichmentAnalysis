@@ -14,6 +14,34 @@ There are two steps in performing an analysis:
 ___Note:___
 The [figshare repository](https://figshare.com/s/71fe1d9b2386ec05f421) uses GO annotation files from the 2019-04-17 release.
 
+## Analysis
+### Gene Score Resampling
+The Gene Score Resampling method for GSEA is performed using the function `SingleEnrichment`.
+This requires GO Terms and annotations to be processing (as described in the Initialization section below).
+To assess significance of gene scores annotated to a specific GO category, this analysis compares results to a null model in which scores are assigned to genes at random.
+
+__INPUTS__:
+* `geneScores`, a numGenes-long column vector of values that quantifies something about each gene.
+* `geneEntrezIDs`, numGenes-long column vector labeling the entrez ID for each gene in geneScores.
+Extra options set as fields in a parameter structure:
+* `dataSource`, specifies the source of GO annotations, to be loaded using `GetFilteredGOData`.
+Options are `mouse-direct` (hierarchy and annotations taken directly from GO), `human-direct` (hierarchy and annotations taken directly from GO), `mouse-GEMMA` (processed hierarchy and annotations downloaded from GEMMA).
+* `processFilter`, a subset of GO processes to consider.
+Default: `biological_process`.
+* `sizeFilter`, filter to a subset of GO categories by their number of annotations ('size').
+Default is `[5,200]` (only consider GO categories with between 5 and 200 gene annotations).
+* `numSamples`, number of iterations (`1e4` is the default, can ramp up to get better significance estimates for small p-values).
+
+__EXAMPLE USAGE__:
+```matlab
+enrichmentSettings = struct();
+enrichmentSettings.dataSource = 'mouse-direct';
+enrichmentSettings.processFilter = 'biological_process';
+enrichmentSettings.sizeFilter = [5,200];
+enrichmentSettings.numSamples = 1e4;
+GOTable = SingleEnrichment(geneScores,geneEntrezIDs,enrichmentSettings);
+```
+
 ## Initialization
 
 We first describe how to retrieve and process data from GO in a form that facilitates GSEA.
@@ -57,13 +85,21 @@ The appropriate annotation file(s) should be placed in the `RawData` directory.
 Each line in the [annotation file](http://geneontology.org/page/go-annotation-file-formats) represents an association between a gene product and a GO term with a certain evidence code, and the reference to support the association.
 The `ReadDirectAnnotationFile` function reads in all of this raw data, and processes it into a Matlab table, with a row for each GO Category, including information about the category and the genes that are annotated to it.
 
+Before this can be run, it requires a mapping from MGI gene identifiers to NCBI Entrez gene identifiers.
+In mouse, this is achieved by taking data from [_MouseMine_](http://www.mousemine.org).
+```bash
+python3 MGI_NCBI_downloadall.py
+```
+This saves the required gene identifier mapping to `ALL_MGI_ID_NCBI.csv`.
+In the case of human data, we mapped onto gene symbols from processed gene-expression data from the [Allen Human Brain Atlas](https://human.brain-map.org/).
+
 ```matlab
 ReadDirectAnnotationFile('mouse')
 ```
 
 Saves processed data as `GOAnnotationDirect-mouse.mat` (or `GOAnnotationDirect-human.mat`), in the `ProcessedData` directory.
 
-___Note (untested)___: Annotations processed from [GEMMA](https://gemma.msl.ubc.ca/annots/) can alternatively be read using `ReadGEMMAAnnotationFile`.
+___Note (NOT RECOMMENDED)___: Annotations processed from [GEMMA](https://gemma.msl.ubc.ca/annots/) can alternatively be read using `ReadGEMMAAnnotationFile`.
 
 #### Propagate annotations up through the hierarchy
 Annotations are made at the lowest level of the GO term hierarchy.
@@ -74,30 +110,7 @@ For mouse biological processes, this is achieved using:
 ```matlab
 propagateHierarchy('mouse','biological_process');
 ```
-Loads in from the previous step (e.g., `GOAnnotationDirect-mouse.mat`) and saves output as `GOAnnotationDirect-mouse-biological_process-Prop.mat`.
+The code takes processed data (e.g., `GOAnnotationDirect-mouse.mat`) and saves propagated output as `GOAnnotationDirect-mouse-biological_process-Prop.mat`.
 This information can then be read in for enrichment or other analyses.
 
 Note that this script requires access to a mySQL database containing the hierarchical GO term information.
-
-## Analyses
-### Conventional enrichment using `SingleEnrichment`
-Conventional enrichment results can be obtained using `SingleEnrichment`.
-This analysis considers a null model in which scores can be assigned to individual genes at random.
-
-INPUTS:
-* `geneScores`, a numGenes-long column vector of values that quantifies something about each gene.
-* `geneEntrezIDs`, numGenes-long column vector labeling the entrez ID for each gene in geneScores.
-Extra options set as fields in a parameter structure:
-* `dataSource`, specifies the source of GO annotations, to be loaded using `GetFilteredGOData`. Options are `mouse-direct` (hierarchy and annotations taken directly from GO), `human-direct` (hierarchy and annotations taken directly from GO), `mouse-GEMMA` (processed hierarchy and annotations downloaded from GEMMA).
-* `processFilter`, what GO processes to consider. Default is `biological_process`.
-* `sizeFilter`, filter GO categories by size. Default is `[5,200]` (only consider categories with between 5 and 200 annotations).
-* `numSamples`, number of iterations (`1e4` is the default, can ramp up to get better significance estimates for small p-values).
-
-```matlab
-enrichmentSettings = struct();
-enrichmentSettings.dataSource = 'mouse-direct';
-enrichmentSettings.processFilter = 'biological_process';
-enrichmentSettings.sizeFilter = [5,100];
-enrichmentSettings.numSamples = 1e4;
-GOTable = SingleEnrichment(geneScores,geneEntrezIDs,enrichmentSettings);
-```
