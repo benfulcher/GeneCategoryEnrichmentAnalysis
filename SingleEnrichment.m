@@ -84,7 +84,7 @@ parfor i = 1:numGOCategories
 end
 
 %-------------------------------------------------------------------------------
-% FDR 'correction' to both methods of estimating p-values:
+% FDR-correction to p-values:
 pValCorr = mafdr(pVal,'BHFDR','true');
 pValZCorr = mafdr(pValZ,'BHFDR','true');
 

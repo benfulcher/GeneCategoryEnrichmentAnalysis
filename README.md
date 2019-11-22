@@ -1,18 +1,30 @@
 # Gene Set Enrichment Analysis by Gene Score Resampling
 
 This is a Matlab repository for performing Gene Set Enrichment Analysis (GSEA) on Gene Ontology (GO) Terms.
-Given a set of scores assigned to genes, we use the permutation-based method of Gene Score Resampling (GSR), following the [*ermineJ*](https://erminej.msl.ubc.ca/) software package.
+Given a set of scores assigned to genes, we use the permutation-based method of Gene Score Resampling, following the [*ermineJ*](https://erminej.msl.ubc.ca/) software package.
 The package supports conventional enrichment, which generates a null distribution for some summary statistic across the scores assigned to genes annotated to a given GO Term by randomizing the assignment of genes to GO categories.
 These null distributions depend on the size of the GO Category.
 
 The package is currently set up to perform enrichment on GO Biological Processes.
+
+The package is organized into directories as follows:
+__DATA__:
+1. `RawData`: all data downloaded from external sources (like GO, MouseMine, etc.)
+2. `ProcessedData`: raw data processed into Matlab-readable files.
+__CODE__:
+1. `DataProcessing`: code required to process raw data.
+2. `Analysis`: code to run enrichment analysis.
+3. `ResultsComparison`: code to compare results to alternative code packages for performing GSEA.
+4. `Peripheral`: additional code files.
+
+All of these subdirectories can be added to the current path by running the `startup` script.
 
 There are two steps in performing an analysis:
 1. Initialize the package with the latest GO hierarchy and gene annotations (or download processed results from [figshare](https://figshare.com/s/71fe1d9b2386ec05f421)).
 2. Run an enrichment analysis.
 
 ___Note:___
-The [figshare repository](https://figshare.com/s/71fe1d9b2386ec05f421) uses GO annotation files from the 2019-04-17 release.
+This [figshare repository](https://figshare.com/s/71fe1d9b2386ec05f421) gives processed outputs from GO annotation files from the 2019-04-17 release.
 
 ## Analysis
 ### Gene Score Resampling
@@ -41,6 +53,13 @@ enrichmentSettings.sizeFilter = [5,200];
 enrichmentSettings.numSamples = 1e4;
 GOTable = SingleEnrichment(geneScores,geneEntrezIDs,enrichmentSettings);
 ```
+
+The output `GOTable` sorts GO categories by their estimated _p_-value.
+Note that _p_-values are estimated according to two different methods:
+1. `pValPerm`: _p_-value from a permutation test.
+2. `pValZ`: _p_-value estimated from a Gaussian fit to the null distribution.
+
+Both _p_-value estimates are corrected using the method of false discovery rate (Benjamini and Hochberg), in the corresponding columns `pValPermCorr` and `pValZCorr`.
 
 ## Initialization
 
