@@ -1,5 +1,5 @@
 function GOTable = SingleEnrichment(geneScores,geneEntrezIDs,params);
-% Enrichment under a random-gene null
+% SingleEnrichment   Perform Gene-Set Enrichment under a random-gene null
 %
 %---INPUTS:
 % * geneScores, a numGenes-long column vector of values that quantifies
@@ -23,11 +23,7 @@ function GOTable = SingleEnrichment(geneScores,geneEntrezIDs,params);
 %-------------------------------------------------------------------------------
 % Check inputs and set defaults:
 if nargin < 3
-    params = struct();
-    params.dataSource = 'mouse-direct';
-    params.processFilter = 'biological_process';
-    params.sizeFilter = [5,200];
-    params.numSamples = 1e4;
+    params = GiveMeDefaultEnrichmentParams();
 end
 
 % Convert out of structure:
