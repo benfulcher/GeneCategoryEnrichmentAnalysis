@@ -1,23 +1,27 @@
 # Gene Set Enrichment Analysis by Gene Score Resampling
 
 This is a Matlab repository for performing Gene Set Enrichment Analysis (GSEA) on Gene Ontology (GO) Terms.
-Given a set of scores assigned to genes, we use the permutation-based method of Gene Score Resampling, following the [*ermineJ*](https://erminej.msl.ubc.ca/) software package.
+Given a set of scores assigned to genes, we use the permutation-based method of Gene Score Resampling, following the methodology implemented in the [*ermineJ*](https://erminej.msl.ubc.ca/) software package.
 The package supports conventional enrichment, which generates a null distribution for some summary statistic across the scores assigned to genes annotated to a given GO Term by randomizing the assignment of genes to GO categories.
 These null distributions depend on the size of the GO Category.
-
 The package is currently set up to perform enrichment on GO Biological Processes.
 
+#### Repository Organization
 The package is organized into directories as follows:
+
 __DATA__:
 1. `RawData`: all data downloaded from external sources (like GO, MouseMine, etc.)
 2. `ProcessedData`: raw data processed into Matlab-readable files.
+
 __CODE__:
 1. `DataProcessing`: code required to process raw data.
 2. `Analysis`: code to run enrichment analysis.
-3. `ResultsComparison`: code to compare results to alternative code packages for performing GSEA.
+3. `ResultsComparison`: code to compare GSEA results to _ermineJ_.
 4. `Peripheral`: additional code files.
 
 All of these subdirectories can be added to the current path by running the `startup` script.
+
+#### Using the Repository
 
 There are two steps in performing an analysis:
 1. Initialize the package with the latest GO hierarchy and gene annotations (or download processed results from [figshare](https://figshare.com/s/71fe1d9b2386ec05f421)).
@@ -130,6 +134,4 @@ For mouse biological processes, this is achieved using:
 propagateHierarchy('mouse','biological_process');
 ```
 The code takes processed data (e.g., `GOAnnotationDirect-mouse.mat`) and saves propagated output as `GOAnnotationDirect-mouse-biological_process-Prop.mat`.
-This information can then be read in for enrichment or other analyses.
-
-Note that this script requires access to a mySQL database containing the hierarchical GO term information.
+These propagated annotations can then be used for enrichment analysis.
