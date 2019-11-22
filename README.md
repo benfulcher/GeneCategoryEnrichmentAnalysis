@@ -5,9 +5,14 @@ Given a set of scores assigned to genes, we use the permutation-based method of 
 The package supports conventional enrichment, which generates a null distribution for some summary statistic across the scores assigned to genes annotated to a given GO Term by randomizing the assignment of genes to GO categories.
 These null distributions depend on the size of the GO Category.
 
+The package is currently set up to perform enrichment on GO Biological Processes.
+
 There are two steps in performing an analysis:
 1. Initialize the package with the latest GO hierarchy and gene annotations (or download processed results from [figshare](https://figshare.com/s/71fe1d9b2386ec05f421)).
 2. Run an enrichment analysis.
+
+___Note:___
+The [figshare repository](https://figshare.com/s/71fe1d9b2386ec05f421) uses GO annotation files from the 2019-04-17 release.
 
 ## Initialization
 
@@ -19,44 +24,53 @@ This involves the following steps:
 2. Retrieve and process the annotations of genes to GO Terms.
 3. Iteratively propagate gene-to-Term annotations from child to parent up the GO hierarchy.
 
-### Retrieving the GO-Term Hierarchy
+### Processing the GO-Term Hierarchy
+#### Downloading the data
 There are a number of routes to [downloading the GO Term hierarchy](http://geneontology.org/page/download-ontology).
-We used the **termdb** [mySQL database dump](http://archive.geneontology.org/latest-termdb/go_daily-termdb-tables.tar.gz), and link to this database using a mySQL java connector, as implemented in the [Matlab_mySQL repository](https://github.com/benfulcher/Matlab_mySQL).
+We used the **termdb** [mySQL database dump](http://archive.geneontology.org/latest-termdb/go_daily-termdb-tables.tar.gz), and linked to this database from Matlab using a mySQL java connector.
+Code for achieving this (e.g., in the [Matlab_mySQL repository](https://github.com/benfulcher/Matlab_mySQL)) is a dependency for this package.
 
-The data is provided in raw form as `go-basic.obo` (`basic` file ensures that annotations can be propagated), and you can also download it as a [database](ftp://ftp.geneontology.org/go/www/GO.downloads.database.shtml).
+___Note___: the data is also provided in raw form as `go-basic.obo` (the `basic` file ensures that annotations can be propagated), and you can also download the data as a [database](ftp://ftp.geneontology.org/go/www/GO.downloads.database.shtml).
 
-Assumes you have an SQL database setup, with details entered into `GetGOTerms`.
+#### Reading and Processing:
+1. Set up downloaded `termdb` mySQL database, and put connection details in `ConnectMeDatabase`.
+2. Retrieve Biological Process GO Terms, and save the filtered set of terms to a .mat file:
 
-Get biological process GO terms and save the filtered set of GO terms to file:
 ```matlab
 GOTerms = GetGOTerms('biological_process',true);
 ```
 Saves out to `ProcessedData/GOTerms_BP.mat`.
 
-### Generating formatted files for Matlab, processed from raw GO annotations
-
-
+### Processing GO Term Annotations
+Now that we have the GO Terms in Matlab format, we next need data on which genes are annotated to which GO Terms.
 
 #### Downloading raw GO annotation data
 
-You can download annotation files direct from the [GO website](http://current.geneontology.org/products/pages/downloads.html).
-For _Mus musculus_, this yields: `mgi.gaf`.
-For _Homo sapiens_, it is: `goa_human.gaf`.
-Data used here is from the 2019-04-17 release.
+Annotation files should be downloaded directly from the [GO website](http://current.geneontology.org/products/pages/downloads.html).
+* For _Mus musculus_, the annotation file is `mgi.gaf`.
+* For _Homo sapiens_, the annotation file is `goa_human.gaf`.
 
-#### Read in from the GO annotation file:
+The appropriate annotation file(s) should be placed in the `RawData` directory.
+
+#### Processing data from the annotation file
+
+Each line in the [annotation file](http://geneontology.org/page/go-annotation-file-formats) represents an association between a gene product and a GO term with a certain evidence code, and the reference to support the association.
+The `ReadDirectAnnotationFile` function reads in all of this raw data, and processes it into a Matlab table, with a row for each GO Category, including information about the category and the genes that are annotated to it.
+
 ```matlab
 ReadDirectAnnotationFile('mouse')
 ```
-Saves processed data in the form `GOAnnotationDirect-mouse.mat`, in the `ProcessedData` directory.
 
-Note that processed annotations from [GEMMA](https://gemma.msl.ubc.ca/annots/) can alternatively be read in using `ReadGEMMAAnnotationFile`.
+Saves processed data as `GOAnnotationDirect-mouse.mat` (or `GOAnnotationDirect-human.mat`), in the `ProcessedData` directory.
+
+___Note (untested)___: Annotations processed from [GEMMA](https://gemma.msl.ubc.ca/annots/) can alternatively be read using `ReadGEMMAAnnotationFile`.
 
 #### Propagate annotations up through the hierarchy
 Annotations are made at the lowest level of the GO term hierarchy.
-It therefore makes sense to propagate direct annotations up to all the parent terms.
-This can be achieved using:
+Annotations at a lower level of the hierarchy apply to all parent terms.
+For performing enrichment, we therefore need to iteratively propagate direct annotations up the hierarchy, using `is_a` (child-parent) relationships from the `term2term` table from the GO Term database.
 
+For mouse biological processes, this is achieved using:
 ```matlab
 propagateHierarchy('mouse','biological_process');
 ```

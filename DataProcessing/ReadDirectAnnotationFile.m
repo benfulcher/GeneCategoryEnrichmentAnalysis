@@ -1,17 +1,19 @@
 function ReadDirectAnnotationFile(whatSpecies)
-% Can download annotation files direct from the GO website
+% ReadDirectAnnotationFile  Process raw annotation files into Matlab format.
+% GO annotation files are .gaf
+%-------------------------------------------------------------------------------
+% Annotation files can be downloaded directly from the GO website
 % http://geneontology.org/page/download-annotations
 % Each line in the file represents a single association between a gene product
 % and a GO term with a certain evidence code and the reference to support the link.
 % (http://geneontology.org/page/go-annotation-file-formats)
-%
-% This function processes these raw annotation files -> .mat file
 %-------------------------------------------------------------------------------
 if nargin < 1
     whatSpecies = 'mouse';
 end
 %-------------------------------------------------------------------------------
 
+% Get the name of the file:
 switch whatSpecies
 case 'mouse'
     filePathRead = 'mus_muscus_annotation.mgi';
@@ -21,6 +23,7 @@ case 'human'
 otherwise
     error('Unknown data file for species: ''%s''',whatSpecies);
 end
+
 
 fprintf(1,'Reading data from %s...',filePathRead);
 fid = fopen(filePathRead,'r');
@@ -34,16 +37,6 @@ fclose(fid);
 
 % Represent as a Matlab table object (of form entrez,acronym,name,GO-annotations)
 annotationTable = table();
-% switch whatSpecies
-% case 'mouse'
-%     annotationTable.MGI_ID = C{2};
-%     annotationTable.acronym = C{3};
-%     annotationTable.qualifier = categorical(C{4});
-%     annotationTable.GOID = C{5};
-%     annotationTable.evidenceCode = categorical(C{7});
-%     annotationTable.geneName = C{10};
-%     annotationTable.geneOrProtein = categorical(C{12});
-% case 'human'
 annotationTable.ID = C{2};
 annotationTable.acronym = C{3};
 annotationTable.qualifier = categorical(C{4});
@@ -51,7 +44,6 @@ annotationTable.GOID = C{5};
 annotationTable.evidenceCode = categorical(C{7});
 annotationTable.geneName = C{10};
 annotationTable.geneOrProtein = categorical(C{12});
-% end
 fprintf(1,' Data loaded\n');
 
 %-------------------------------------------------------------------------------
@@ -165,7 +157,7 @@ fprintf(1,'%u GO terms represented... Annotating to Entrez IDs...',numGOCategori
 geneEntrezAnnotations = cell(numGOCategories,1);
 parfor i = 1:numGOCategories
     geneEntrezAnnotations{i} = annotationTable.EntrezID(strcmp(annotationTable.GOID,allGOCategories{i}));
-    % Don't include duplicates:
+    % Remove duplicates:
     geneEntrezAnnotations{i} = unique(geneEntrezAnnotations{i});
 end
 fprintf(1,' Annotated.\n');

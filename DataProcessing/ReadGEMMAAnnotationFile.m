@@ -62,7 +62,6 @@ numGOCategories = length(allGOCategories);
 geneEntrezAnnotations = cell(numGOCategories,1);
 parfor i = 1:numGOCategories
     geneEntrezAnnotations{i} = allEntrez(cellfun(@(x)ismember(allGOCategories(i),x),allGOSplitNum));
-    % fprintf(1,'%u/%u\n',i,numGOCategories);
 end
 
 %-------------------------------------------------------------------------------
