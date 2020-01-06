@@ -1,19 +1,50 @@
-function params = GiveMeDefaultEnrichmentParams()
-% GiveMeDefaultEnrichmentParams   Returns default GSR parameters
+function enrichmentParams = GiveMeDefaultEnrichmentParams()
+
+% Store everything you need in this structure:
+enrichmentParams = struct();
+
+%-------------------------------------------------------------------------------
+% Generic details about the enrichment:
+% (sufficient for conventional enrichment)
 %-------------------------------------------------------------------------------
 
-params = struct();
-
-% Where to get annotation information from
-params.dataSource = 'mouse-direct';
-
 % What high-level GO categories to filter:
-params.processFilter = 'biological_process';
+enrichmentParams.processFilter = 'biological_process';
 
 % What range of GO category sizes to include:
-params.sizeFilter = [5,200];
+enrichmentParams.sizeFilter = [10,200];
 
-% How many samples to generate to estimate the null distribution:
-params.numSamples = 1e4;
+% How many samples to compute per GO category (to estimate the null distribution):
+enrichmentParams.numNullSamples = 4e4;
+
+% Display categories with corrected p-value below this threshold:
+enrichmentParams.sigThresh = 0.05;
+
+
+%-------------------------------------------------------------------------------
+% Additional details specific to the ensemble-based enrichment:
+% (on the basis of spatial correlations)
+%-------------------------------------------------------------------------------
+% What type of correlation to use
+enrichmentParams.whatCorr = 'Spearman'; % 'Pearson', 'Spearman'
+
+% How to agglomerate scores within a GO category:
+enrichmentParams.aggregateHow = 'mean'; % 'mean'
+
+% What type of null:
+enrichmentParams.whatEnsemble = 'randomMap';
+
+% Specify a custom data file in the case of running 'spatialLag' enrichment:
+enrichmentParams.dataFileSurrogate = [];
+
+% Map parameters on to an appropriate file name to save results to:
+% (can include different mappings for different combinations of parameter variation)
+enrichmentParams.fileNameOut = sprintf('PhenotypeNulls_%s_%u.mat',...
+                                enrichmentParams.whatEnsemble,...
+                                enrichmentParams.numNullSamples);
+
+% Store all null computations in a consistent directory:
+enrichmentParams.fileNameOut = fullfile('EnsembleEnrichment','NullEnsembles',...
+                                            enrichmentParams.fileNameOut);
 
 end

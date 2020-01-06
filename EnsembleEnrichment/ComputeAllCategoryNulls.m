@@ -1,4 +1,4 @@
-function GOTable = ComputeAllCategoryNulls(params,phenotypeVector,saveOut,beVerbose)
+function GOTable = ComputeAllCategoryNulls(geneDataStruct,enrichmentParams,phenotypeVector,saveOut,beVerbose)
 % ComputeAllCategoryNulls   Compute an ensemble-based null distribution for all
 %                               GO categories.
 %
@@ -6,51 +6,64 @@ function GOTable = ComputeAllCategoryNulls(params,phenotypeVector,saveOut,beVerb
 % All parameters of the caculation are set in the params structure
 %   (easiest way is to set default values using GiveMeDefaultEnsembleParams)
 %
+% geneDataStruct should be a structure containing:
+%   - expressionMatrix
+%   - entrezIDs (labeling genes as columns)
 %-------------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------------
-% Check Inputs and Set Defaults:
+% Check inputs and set defaults:
 %-------------------------------------------------------------------------------
 if nargin < 1
-    params = GiveMeDefaultEnsembleParams();
+    error('You must provide processed gene-expression data');
 end
 if nargin < 2
+    enrichmentParams = GiveMeDefaultEnrichmentParams();
+end
+if nargin < 3
     % If a specific phenotype is specified, repeat the calculation on this single phenotype:
     phenotypeVector = [];
 end
-if nargin < 3
+if nargin < 4
     saveOut = true;
 end
-if nargin < 4
+if nargin < 5
     beVerbose = true;
 end
 
 %-------------------------------------------------------------------------------
-% Get real data:
-[geneData,geneInfo,structInfo] = LoadMeG(params.g);
-numGenes = height(geneInfo);
-numAreas = height(structInfo);
+% Load gene-expression data:
+geneData = geneDataStruct.expressionMatrix;
+numAreas = size(geneData,1);
+entrezIDs = geneDataStruct.entrezIDs;
 
 %-------------------------------------------------------------------------------
 % Get a generic GO Table:
-GOTable = GiveMeGOData(params,geneInfo.entrez_id);
-numAreas = height(structInfo);
+GOTable = GetFilteredGOData(enrichmentParams.dataSource,...
+                                enrichmentParams.processFilter,...
+                                enrichmentParams.sizeFilter,...
+                                entrezIDs);
 numGOCategories = height(GOTable);
-numGenesReal = height(geneInfo);
 
 %-------------------------------------------------------------------------------
 % Get random vectors from real genes to use as null spatial maps:
-switch params.whatEnsemble
+switch enrichmentParams.whatEnsemble
 case 'customSpecified'
     % Specify a custom phenotype and just run the full calculation on this:
     nullMaps = phenotypeVector;
     params.numNullSamples = 1;
+    fprintf(1,'Computing category scores for the spatial phenotype provided\n');
 case 'randomMap'
     % Generate as many random maps as null samples:
     nullMaps = rand(numAreas,numNullSamples);
+    fprintf(1,'Computing category scores for %u random %u-region phenotypes\n',...
+                                    numNullSamples,numAreas);
 case 'customEnsemble'
     % Get the pre-computed surrogate data:
-    nullMaps = dlmread(dataFileSurrogate,',',1,1);
+    nullMaps = dlmread(enrichmentParams.dataFileSurrogate,',',1,1);
+    fprintf(1,'Computing category scores for %u custom-loaded %u-region phenotypes\n',...
+                                    size(nullMaps,2),size(nullMaps,1));
+    fprintf(1,'(Null spatial maps loaded from %s)\n',enrichmentParams.dataFileSurrogate);
 otherwise
     error('Unknown null type: ''%s''',whatEnsemble);
 end
@@ -102,15 +115,13 @@ for i = 1:numGOCategories
 end
 
 %-------------------------------------------------------------------------------
+% Assign to the table:
 GOTable.categoryScores = categoryScores;
 
 %-------------------------------------------------------------------------------
 % Save results to .mat file
 if saveOut
-    fileNameOut = sprintf('RandomNull_%u_%s-%s_%s_%s_%s.mat',params.numNullSamples,whatSpecies,...
-                                    params.g.structFilter,params.whatEnsemble,whatCorr,aggregateHow);
-    fileNameOut = fullfile('DataOutputs',fileNameOut);
-    save(fileNameOut,'GOTable','params','-v7.3');
+    save(fileNameOut,'GOTable','enrichmentParams','-v7.3');
     fprintf(1,'Results of %u iterations saved to %s\n',params.numNullSamples,fileNameOut);
 end
 
