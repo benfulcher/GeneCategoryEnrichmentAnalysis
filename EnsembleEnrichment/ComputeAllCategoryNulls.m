@@ -9,6 +9,7 @@ function GOTable = ComputeAllCategoryNulls(geneDataStruct,enrichmentParams,pheno
 % geneDataStruct should be a structure containing:
 %   - expressionMatrix
 %   - entrezIDs (labeling genes as columns)
+%
 %-------------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------------
@@ -51,15 +52,15 @@ switch enrichmentParams.whatEnsemble
 case 'customSpecified'
     % Specify a custom phenotype and just run the full calculation on this:
     nullMaps = phenotypeVector;
-    params.numNullSamples = 1;
+    enrichmentParams.numNullSamples = 1;
     fprintf(1,'Computing category scores for the spatial phenotype provided\n');
 case 'randomMap'
     % Generate as many random maps as null samples:
-    nullMaps = rand(numAreas,numNullSamples);
+    nullMaps = rand(numAreas,enrichmentParams.numNullSamples);
     fprintf(1,'Computing category scores for %u random %u-region phenotypes\n',...
-                                    numNullSamples,numAreas);
+                                enrichmentParams.numNullSamples,numAreas);
 case 'customEnsemble'
-    % Get the pre-computed surrogate data:
+    % Get the pre-computed surrogate data from a comma-delimited text file:
     nullMaps = dlmread(enrichmentParams.dataFileSurrogate,',',1,1);
     fprintf(1,'Computing category scores for %u custom-loaded %u-region phenotypes\n',...
                                     size(nullMaps,2),size(nullMaps,1));
@@ -81,7 +82,7 @@ for i = 1:numGOCategories
 
     % Match genes for this category:
     theGenesEntrez = GOTable.annotations{i};
-    matchMe = find(ismember(geneInfo.entrez_id,theGenesEntrez));
+    matchMe = find(ismember(entrezIDs,theGenesEntrez));
     geneDataCategory = geneData(:,matchMe);
     numGenesCategory = length(matchMe);
 
@@ -91,26 +92,26 @@ for i = 1:numGOCategories
     end
 
     % Compute the distribution of gene-category scores for correlation with the null maps:
-    scoresHere = nan(numGenesCategory,params.numNullSamples);
+    scoresHere = nan(numGenesCategory,enrichmentParams.numNullSamples);
     for k = 1:numGenesCategory
         expressionVector = geneDataCategory(:,k);
-        if params.numNullSamples==1
-            scoresHere(k) = corr(nullMaps(:,1),expressionVector,'type',params.whatCorr,'rows','pairwise');
+        if enrichmentParams.numNullSamples==1
+            scoresHere(k) = corr(nullMaps(:,1),expressionVector,'type',enrichmentParams.whatCorr,'rows','pairwise');
         else
-            parfor j = 1:params.numNullSamples
-                scoresHere(k,j) = corr(nullMaps(:,j),expressionVector,'type',params.whatCorr,'rows','pairwise');
+            parfor j = 1:enrichmentParams.numNullSamples
+                scoresHere(k,j) = corr(nullMaps(:,j),expressionVector,'type',enrichmentParams.whatCorr,'rows','pairwise');
             end
         end
     end
 
     % Aggregate gene-wise scores into an overall GO category score
-    switch params.aggregateHow
+    switch enrichmentParams.aggregateHow
     case 'mean'
         categoryScores{i} = nanmean(scoresHere,1);
     case 'median'
         categoryScores{i} = nanmedian(scoresHere,1);
     otherwise
-        error('Unknown aggregation option: ''%s''',params.aggregateHow);
+        error('Unknown aggregation option: ''%s''',enrichmentParams.aggregateHow);
     end
 end
 
@@ -121,8 +122,11 @@ GOTable.categoryScores = categoryScores;
 %-------------------------------------------------------------------------------
 % Save results to .mat file
 if saveOut
-    save(fileNameOut,'GOTable','enrichmentParams','-v7.3');
-    fprintf(1,'Results of %u iterations saved to %s\n',params.numNullSamples,fileNameOut);
+    fprintf(1,'Saving %s nulls from %u iterations to ''%s''\n',...
+                    enrichmentParams.whatEnsemble,...
+                    enrichmentParams.numNullSamples,...
+                    enrichmentParams.fileNameOut);
+    save(enrichmentParams.fileNameOut,'GOTable','enrichmentParams','-v7.3');
 end
 
 end

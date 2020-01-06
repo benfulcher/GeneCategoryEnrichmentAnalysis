@@ -26,14 +26,17 @@ end
 %-------------------------------------------------------------------------------
 % Load null distributions into GOTableNull
 %-------------------------------------------------------------------------------
-preComputedNulls = load(fileNullEnsembleResults);
+preComputedNulls = load(fileNullEnsembleResults,'GOTable','enrichmentParams');
 GOTableNull = preComputedNulls.GOTable;
 
 %-------------------------------------------------------------------------------
-% Now compute scores for the real phenotype using the same settings as for the
-% null distribution:
+% Now compute scores for the input phenotype using the same parameter settings
+% as for the null distribution computation:
 %-------------------------------------------------------------------------------
-GOTablePhenotype = ComputeAllCategoryNulls(params,phenotypeVector,false,false);
+enrichmentParams = preComputedNulls.enrichmentParams;
+enrichmentParams.whatEnsemble = 'customSpecified'; % allows us to feed in our custom phenotype
+GOTablePhenotype = ComputeAllCategoryNulls(enrichmentParams,phenotypeVector,false,false);
+
 
 % Check that we have the same GO category IDs in both cases:
 if ~(height(GOTableNull)==height(GOTablePhenotype)) && ~all(GOTableNull.GOID==GOTablePhenotype.GOID)
@@ -48,10 +51,8 @@ GOTablePhenotype = EstimatePVals(GOTableNull.categoryScores,...
                         [GOTablePhenotype.categoryScores{:}],'right',GOTablePhenotype);
 GOTablePhenotype = sortrows(GOTablePhenotype,'pValZ','ascend');
 
-numSig = sum(GOTablePhenotype.pValZCorr < params.e.sigThresh);
+% Give a basic output about significance using pValZCorr:
+numSig = sum(GOTablePhenotype.pValZCorr < enrichmentParams.sigThresh);
 fprintf(1,'%u significant categories at pZ_corr < %.2f\n',numSig,params.e.sigThresh);
-
-[geneData,geneInfo,structInfo] = LoadMeG(params.g);
-ListCategories(geneInfo,GOTablePhenotype,20,'pValZ');
 
 end

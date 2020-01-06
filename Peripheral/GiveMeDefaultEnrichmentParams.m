@@ -29,10 +29,10 @@ enrichmentParams.sigThresh = 0.05;
 enrichmentParams.whatCorr = 'Spearman'; % 'Pearson', 'Spearman'
 
 % How to agglomerate scores within a GO category:
-enrichmentParams.aggregateHow = 'mean'; % 'mean'
+enrichmentParams.aggregateHow = 'mean'; % 'mean', 'median'
 
 % What type of null:
-enrichmentParams.whatEnsemble = 'randomMap';
+enrichmentParams.whatEnsemble = 'randomMap'; % 'randomMap', 'customEnsemble'
 
 % Specify a custom data file in the case of running 'spatialLag' enrichment:
 enrichmentParams.dataFileSurrogate = [];

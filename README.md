@@ -68,7 +68,21 @@ It proceeds through two steps:
 1. Compute the ensemble using `ComputeAllCategoryNulls`
 2. Perform enrichment for a phenotype of interest relative to this null ensemble using `EnsembleEnrichment`
 
-Default parameters for ensemble enrichment can be set using `GiveMeDefaultEnsembleParams`.
+Default parameters for enrichment (including those relevant to ensemble enrichment) are set with `GiveMeDefaultEnrichmentParams`.
+
+__EXAMPLE USAGE__:
+```matlab
+% Set parameters for the calculation
+% (alter parameters within this file to ensure appropriate output filename):
+enrichmentParams = GiveMeDefaultEnrichmentParams();
+
+% Compute category score null distributions resulting from a given null phenotype ensemble:
+% (saves results out to a filename, enrichmentParams.fileNameOut):
+ComputeAllCategoryNulls(geneDataStruct,enrichmentParams,[],true,true);
+
+% Compares a given phenotype to the saved null ensemble
+GOTablePhenotype = EnsembleEnrichment(enrichmentParams.fileNameOut,phenotypeVector)
+```
 
 
 ## Initialization
