@@ -12,10 +12,9 @@ params.aggregateHow = 'mean'; % 'mean'
 params.numNullSamples = 40000;
 
 % What type of null:
-params.whatNullType = 'randomMap';
+params.whatEnsemble = 'randomMap';
 
-% What data to use:
-params.whatSpecies = 'mouse';
-params.structFilter = 'all';
+% Specify a custom data file in the case of running 'spatialLag' enrichment:
+params.dataFileSurrogate = [];
 
 end

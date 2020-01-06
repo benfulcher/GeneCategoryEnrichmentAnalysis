@@ -50,11 +50,7 @@ Default is `[5,200]` (only consider GO categories with between 5 and 200 gene an
 
 __EXAMPLE USAGE__:
 ```matlab
-enrichmentSettings = struct();
-enrichmentSettings.dataSource = 'mouse-direct';
-enrichmentSettings.processFilter = 'biological_process';
-enrichmentSettings.sizeFilter = [5,200];
-enrichmentSettings.numSamples = 1e4;
+enrichmentSettings = GiveMeDefaultEnrichmentParams();
 GOTable = SingleEnrichment(geneScores,geneEntrezIDs,enrichmentSettings);
 ```
 
@@ -64,6 +60,16 @@ Note that _p_-values are estimated according to two different methods:
 2. `pValZ`: _p_-value estimated from a Gaussian fit to the null distribution.
 
 Both _p_-value estimates are corrected using the method of false discovery rate (Benjamini and Hochberg), in the corresponding columns `pValPermCorr` and `pValZCorr`.
+
+### Ensemble Enrichment
+Ensemble enrichment computes the enrichment of a given phenotype relative to an ensemble of randomized phenotypes.
+
+It proceeds through two steps:
+1. Compute the ensemble using `ComputeAllCategoryNulls`
+2. Perform enrichment for a phenotype of interest relative to this null ensemble using `EnsembleEnrichment`
+
+Default parameters for ensemble enrichment can be set using `GiveMeDefaultEnsembleParams`.
+
 
 ## Initialization
 

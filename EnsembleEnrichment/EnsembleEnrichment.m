@@ -1,83 +1,39 @@
-function GOTablePhenotype = EnsembleEnrichment(params,phenotypeVector,whatNullModel)
+function GOTablePhenotype = EnsembleEnrichment(fileNullEnsembleResults,phenotypeVector)
 % EnsembleEnrichment  Compute enrichment in different GO categories according to
 %                       a given null model.
+%
 % Assumes that nulls have been precomputed using ComputeAllCategoryNulls.
 %
-%
 %---INPUTS:
-% params: a structure of relevant parameters
 % phenotypeVector: a vector of the spatial phenotype map to be tested
-% whatNullModel: the null model to use for enrichment
 %
-% params:
-% params.whatCorr ('Spearman').
+% The params are taken from the results of the null ensemble enrichment file
 %
 %---OUTPUT:
 % GOTablePhenotype: a table with p-values estimated from the null ensemble
 
 %-------------------------------------------------------------------------------
-% Process Inputs and Set Defaults:
+% Process inputs and set defaults:
 %-------------------------------------------------------------------------------
 if nargin < 1
-    params = GiveMeDefaultEnsembleParams(params);
+    error('You must specify a file containing the precomputed ensemble nulls');
 end
 if nargin < 2
-    myPhenotype = 'degree';
+    error('You must provide a phenotype vector');
 end
-if nargin < 3
-    whatNullModel = 'randomMap'; % 'spatialLag'
-end
-
-% Pull out fields from the params structure:
-if isfield(params,'whatCorr')
-    whatCorr = params.whatCorr;
-else
-    whatCorr = 'Spearman';
-end
-if isfield(params,'aggregateHow')
-    aggregateHow = params.aggregateHow;
-else
-    aggregateHow = 'mean';
-end
-if isfield(params,'numNullSamples')
-    numNullSamples = params.numNullSamples;
-else
-    numNullSamples = 40000;
-end
-if isfield(params,'whatSpecies')
-    whatSpecies = params.whatSpecies;
-else
-    whatSpecies = 'mouse';
-end
-if isfield(params,'structFilter')
-    structFilter = params.structFilter;
-else
-    structFilter = 'all';
-end
+%-------------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------------
-% Load null distributions: GOTableNull
+% Load null distributions into GOTableNull
 %-------------------------------------------------------------------------------
-% Check for precomputed null results (from running ComputeAllCategoryNulls):
-fileNullEnsembleResults = sprintf('RandomNull_%u_%s-%s_%s_%s_%s.mat',numNullSamples,...
-                    humanOrMouse,structFilter,whatNullModel,whatCorr,aggregateHow);
-fileNullEnsembleResults = fullfile('EnsembleEnrichment','NullEnsembles',fileNullEnsembleResults);
-
 preComputedNulls = load(fileNullEnsembleResults);
 GOTableNull = preComputedNulls.GOTable;
 
-if isfield(preComputedNulls,'params')
-    error('UNUSABLE OLD FILE: %s\n',fileNullEnsembleResults);
-else
-    warning('***ASSUME THAT KEY PARAMETERS MATCH THE LOADED FILE: %s\n',fileNullEnsembleResults);
-    params = preComputedData.params;
-end
-% (The categoryScores variable is the distribution of null samples for each GO category)
-
 %-------------------------------------------------------------------------------
-% Now compute scores for the real phenotype
+% Now compute scores for the real phenotype using the same settings as for the
+% null distribution:
 %-------------------------------------------------------------------------------
-GOTablePhenotype = ComputeAllCategoryNulls(params,1,myPhenotype,whatCorr,aggregateHow,false,false);
+GOTablePhenotype = ComputeAllCategoryNulls(params,phenotypeVector,false,false);
 
 % Check that we have the same GO category IDs in both cases:
 if ~(height(GOTableNull)==height(GOTablePhenotype)) && ~all(GOTableNull.GOID==GOTablePhenotype.GOID)
