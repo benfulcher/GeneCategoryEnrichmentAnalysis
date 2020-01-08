@@ -34,7 +34,6 @@ end
 
 %-------------------------------------------------------------------------------
 % Load gene-expression data:
-type(geneDataStruct)
 geneData = geneDataStruct.expressionMatrix;
 entrezIDs = geneDataStruct.entrezIDs;
 numAreas = size(geneData,1);
