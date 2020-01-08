@@ -34,9 +34,10 @@ end
 
 %-------------------------------------------------------------------------------
 % Load gene-expression data:
+type(geneDataStruct)
 geneData = geneDataStruct.expressionMatrix;
-numAreas = size(geneData,1);
 entrezIDs = geneDataStruct.entrezIDs;
+numAreas = size(geneData,1);
 
 %-------------------------------------------------------------------------------
 % Get a generic GO Table:
@@ -61,7 +62,9 @@ case 'randomMap'
                                 enrichmentParams.numNullSamples,numAreas);
 case 'customEnsemble'
     % Get the pre-computed surrogate data from a comma-delimited text file:
-    nullMaps = dlmread(enrichmentParams.dataFileSurrogate,',',1,1);
+    % nullMaps = dlmread(enrichmentParams.dataFileSurrogate,',',1,1);
+    % Get the pre-computed surrogate data from the variable 'nullMaps' in a .mat file:
+    nullMaps = load(enrichmentParams.dataFileSurrogate,'nullMaps');
     fprintf(1,'Computing category scores for %u custom-loaded %u-region phenotypes\n',...
                                     size(nullMaps,2),size(nullMaps,1));
     fprintf(1,'(Null spatial maps loaded from %s)\n',enrichmentParams.dataFileSurrogate);
