@@ -30,7 +30,7 @@ end
 dataSource = params.dataSource;
 processFilter = params.processFilter;
 sizeFilter = params.sizeFilter;
-numSamples = params.numSamples;
+numSamples = params.numNullSamples;
 
 %-------------------------------------------------------------------------------
 if length(geneScores)~=length(geneEntrezIDs)
