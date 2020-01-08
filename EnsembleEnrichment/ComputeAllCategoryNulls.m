@@ -47,18 +47,23 @@ GOTable = GetFilteredGOData(enrichmentParams.dataSource,...
 numGOCategories = height(GOTable);
 
 %-------------------------------------------------------------------------------
+% Unpack out structure for parfor?
+whatCorr = enrichmentParams.whatCorr;
+numNullSamples = enrichmentParams.numNullSamples;
+
+%-------------------------------------------------------------------------------
 % Get random vectors from real genes to use as null spatial maps:
 switch enrichmentParams.whatEnsemble
 case 'customSpecified'
     % Specify a custom phenotype and just run the full calculation on this:
     nullMaps = phenotypeVector;
-    enrichmentParams.numNullSamples = 1;
+    numNullSamples = 1;
     fprintf(1,'Computing category scores for the spatial phenotype provided\n');
 case 'randomMap'
     % Generate as many random maps as null samples:
-    nullMaps = rand(numAreas,enrichmentParams.numNullSamples);
+    nullMaps = rand(numAreas,numNullSamples);
     fprintf(1,'Computing category scores for %u random %u-region phenotypes\n',...
-                                enrichmentParams.numNullSamples,numAreas);
+                                numNullSamples,numAreas);
 case 'customEnsemble'
     % Get the pre-computed surrogate data from a comma-delimited text file:
     % nullMaps = dlmread(enrichmentParams.dataFileSurrogate,',',1,1);
@@ -70,6 +75,9 @@ case 'customEnsemble'
 otherwise
     error('Unknown null type: ''%s''',whatEnsemble);
 end
+
+
+
 
 %-------------------------------------------------------------------------------
 % Correlation of genes with a given spatial map (or null ensemble of spatial maps):
@@ -94,14 +102,14 @@ for i = 1:numGOCategories
     end
 
     % Compute the distribution of gene-category scores for correlation with the null maps:
-    scoresHere = nan(numGenesCategory,enrichmentParams.numNullSamples);
+    scoresHere = nan(numGenesCategory,numNullSamples);
     for k = 1:numGenesCategory
         expressionVector = geneDataCategory(:,k);
-        if enrichmentParams.numNullSamples==1
-            scoresHere(k) = corr(nullMaps(:,1),expressionVector,'type',enrichmentParams.whatCorr,'rows','pairwise');
+        if numNullSamples==1
+            scoresHere(k) = corr(nullMaps(:,1),expressionVector,'type',whatCorr,'rows','pairwise');
         else
-            parfor j = 1:enrichmentParams.numNullSamples
-                scoresHere(k,j) = corr(nullMaps(:,j),expressionVector,'type',enrichmentParams.whatCorr,'rows','pairwise');
+            parfor j = 1:numNullSamples
+                scoresHere(k,j) = corr(nullMaps(:,j),expressionVector,'type',whatCorr,'rows','pairwise');
             end
         end
     end
@@ -126,7 +134,7 @@ GOTable.categoryScores = categoryScores;
 if saveOut
     fprintf(1,'Saving %s nulls from %u iterations to ''%s''\n',...
                     enrichmentParams.whatEnsemble,...
-                    enrichmentParams.numNullSamples,...
+                    numNullSamples,...
                     enrichmentParams.fileNameOut);
     save(enrichmentParams.fileNameOut,'GOTable','enrichmentParams','-v7.3');
 end
