@@ -100,13 +100,15 @@ for i = 1:numGOCategories
 
     % Compute the distribution of gene-category scores for correlation with the null maps:
     scoresHere = nan(numGenesCategory,numNullSamples);
+    % The correlation to compute:
+    theCorr_fun = @(x) corr(x,expressionVector,'type',whatCorr,'rows','pairwise');
     for k = 1:numGenesCategory
         expressionVector = geneDataCategory(:,k);
         if numNullSamples==1
-            scoresHere(k) = corr(nullMaps(:,1),expressionVector,'type',whatCorr,'rows','pairwise');
+            scoresHere(k) = theCorr_fun(nullMaps(:,1));
         else
             parfor j = 1:numNullSamples
-                scoresHere(k,j) = corr(nullMaps(:,j),expressionVector,'type',whatCorr,'rows','pairwise');
+                scoresHere(k,j) = theCorr_fun(nullMaps(:,j));
             end
         end
     end
