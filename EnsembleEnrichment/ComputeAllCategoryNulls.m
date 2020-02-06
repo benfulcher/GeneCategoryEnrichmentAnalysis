@@ -58,7 +58,7 @@ case 'customSpecified'
     % Specify a custom phenotype and just run the full calculation on this:
     nullMaps = phenotypeVector;
     numNullSamples = 1;
-    fprintf(1,'Computing category scores for the spatial phenotype provided\n');
+    fprintf(1,'Computing category scores for the spatial phenotype provided...\n');
 case 'randomMap'
     % Generate as many random maps as null samples:
     nullMaps = rand(numAreas,numNullSamples);
@@ -125,7 +125,7 @@ for i = 1:numGOCategories
 end
 
 %-------------------------------------------------------------------------------
-% Assign to the table:
+% Assign to the table
 GOTable.categoryScores = categoryScores;
 
 %-------------------------------------------------------------------------------
