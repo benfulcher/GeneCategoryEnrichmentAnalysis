@@ -27,12 +27,13 @@ To initialize this toolbox, all of these subdirectories should be added to the M
 ## Preparation: Defining gene-to-category annotations
 
 The first step in running an enrichment analysis is defining the set of gene categories, and the genes annotated to each category.
-Results of this, using hiearchy-propagated gene-to-category annotations corresponding to GO biological processes (processed as of 2019-04-17), can be downloaded from [this figshare repository](https://figshare.com/s/71fe1d9b2386ec05f421).
+Results of this, using hierarchy-propagated gene-to-category annotations corresponding to GO biological processes (processed as of 2019-04-17), can be downloaded from [this figshare repository](https://figshare.com/s/71fe1d9b2386ec05f421).
 
 Code in this repository also allows you to reprocess these annotations from raw data from GO, as described on [this wiki page](https://github.com/benfulcher/GeneSetEnrichmentAnalysis/wiki/Defining-gene-to-category-annotations).
 
 ## Performing Enrichment
 
+### Setting Parameters
 All parameter settings for enrichment are kept in a Matlab structure that can be set to defaults as:
 ```matlab
 enrichmentParams = GiveMeDefaultEnrichmentParams();
