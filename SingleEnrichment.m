@@ -1,5 +1,11 @@
 function GOTable = SingleEnrichment(geneScores,geneEntrezIDs,params);
-% SingleEnrichment   Perform Gene-Set Enrichment under a random-gene null
+% SingleEnrichment   Perform gene category enrichment under a random-gene null
+%
+% This follows the permutation-based method of Gene Score Resampling, as
+% implemented in ermineJ (https://erminej.msl.ubc.ca/), which assesses the
+% significance of the scores assigned to genes in a given category of genes
+% relative to an ensemble of categories containing the same number of random
+% genes.
 %
 %---INPUTS:
 % * geneScores, a numGenes-long column vector of values that quantifies

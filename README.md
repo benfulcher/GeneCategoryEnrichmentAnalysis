@@ -1,10 +1,13 @@
-# Gene Set Enrichment Analysis by Gene Score Resampling
+# Gene Category Enrichment Analysis
 
-This is a Matlab repository for performing Gene Set Enrichment Analysis (GSEA) on Gene Ontology (GO) Terms.
-Given a set of scores assigned to genes, we use the permutation-based method of Gene Score Resampling, following the methodology implemented in the [*ermineJ*](https://erminej.msl.ubc.ca/) software package.
-The package supports conventional enrichment, which generates a null distribution for some summary statistic across the scores assigned to genes annotated to a given GO Term by randomizing the assignment of genes to GO categories.
-These null distributions depend on the size of the GO Category.
-The package is currently set up to perform enrichment on GO Biological Processes.
+This is a Matlab toolbox for performing gene category enrichment analysis relative to two different types of null models:
+1. ___Random-gene nulls___, in which categories assessed relative to categories of the same size but annotated by the same number of random genes.
+   This follows the permutation-based method of Gene Score Resampling (as implemented in [*ermineJ*](https://erminej.msl.ubc.ca/)).
+2. ___Ensemble-based nulls___, in which categories are assessed relative to an ensemble of null phenotypes, as introduced in [this bioRxiv preprint](https://doi.org/10.1101/2020.04.24.058958).
+
+The package is currently set up to perform enrichment on [Gene Ontology](http://geneontology.org/) (GO) Biological Process annotations, but could be modified in future to use other GO annotations, or use other annotation systems (like [KEGG](https://www.genome.jp/kegg/)).
+
+Pull requests to improve the functionality and clarity of documentation are very welcome!
 
 #### Repository Organization
 The package is organized into directories as follows:
@@ -19,16 +22,15 @@ __CODE__:
 3. `ResultsComparison`: code to compare GSEA results to _ermineJ_.
 4. `Peripheral`: additional code files.
 
-All of these subdirectories can be added to the current path by running the `startup` script.
+To initialize this toolbox, all of these subdirectories should be added to the Matlab path by running the `startup` script.
 
-#### Using the Repository
+### Step 1: Defining gene-to-category annotations
 
-There are two steps in performing an analysis:
-1. Initialize the package with the latest GO hierarchy and gene annotations (or download processed results from [figshare](https://figshare.com/s/71fe1d9b2386ec05f421)).
-2. Run an enrichment analysis.
+The first step in running an enrichment analysis is defining the set of gene categories, and the genes annotated to each category.
+Here, we use the GO biological process annotations.
+These can be processed from raw data using code in this toolbox, or you can download a recent set of processed results from [this figshare repository](https://figshare.com/s/71fe1d9b2386ec05f421), which provides processed outputs from GO annotation files from the 2019-04-17 release.
 
-___Note:___
-This [figshare repository](https://figshare.com/s/71fe1d9b2386ec05f421) gives processed outputs from GO annotation files from the 2019-04-17 release.
+This is described below.
 
 ## Analysis
 ### Gene Score Resampling
