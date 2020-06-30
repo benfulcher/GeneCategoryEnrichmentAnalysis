@@ -1,5 +1,7 @@
 # Gene Category Enrichment Analysis
 
+[![DOI](https://zenodo.org/badge/79196471.svg)](https://zenodo.org/badge/latestdoi/79196471)
+
 This is a Matlab toolbox for performing gene category enrichment analysis relative to two different types of null models:
 1. ___Random-gene nulls___, in which categories assessed relative to categories of the same size but annotated by the same number of random genes.
    This follows the permutation-based method of Gene Score Resampling (as implemented in [*ermineJ*](https://erminej.msl.ubc.ca/)).
