@@ -4,7 +4,7 @@ function GOTable = ComputeAllCategoryNulls(geneDataStruct,enrichmentParams,pheno
 %
 % Can also compute for a specific phenotype by specifying a non-empty phenotypeVector
 % All parameters of the caculation are set in the params structure
-%   (easiest way is to set default values using GiveMeDefaultEnsembleParams)
+%   (easiest way is to set default values using GiveMeDefaultEnrichmentParams)
 %
 % INPUTS:
 % ---geneDataStruct should be a structure containing:
