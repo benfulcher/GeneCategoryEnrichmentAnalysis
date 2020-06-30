@@ -31,8 +31,24 @@ Results of this, using hiearchy-propagated gene-to-category annotations correspo
 
 Code in this repository also allows you to reprocess these annotations from raw data from GO, as described on [this wiki page](https://github.com/benfulcher/GeneSetEnrichmentAnalysis/wiki/Defining-gene-to-category-annotations).
 
-## Analysis
-### Random-Gene Null (Gene Score Resampling)
+## Performing Enrichment
+
+All parameter settings for enrichment are kept in a Matlab structure that can be set to defaults as:
+```matlab
+enrichmentParams = GiveMeDefaultEnrichmentParams();
+```
+You can alter the properties of the enrichment analysis by altering the parameter values set in `GiveMeDefaultEnrichmentParams` (this will ensure accurate filenames, determined within `GiveMeDefaultEnrichmentParams`).
+
+Some example parameters:
+* `dataSource`, specifies the source of GO annotations, to be loaded using `GetFilteredGOData`.
+Options are `mouse-direct` (hierarchy and annotations taken directly from GO), `human-direct` (hierarchy and annotations taken directly from GO), `mouse-GEMMA` (processed hierarchy and annotations downloaded from GEMMA).
+* `processFilter`, a subset of GO processes to consider.
+Default: `biological_process`.
+* `sizeFilter`, filter to a subset of GO categories by their number of annotations ('size').
+Default is `[5,200]` (only consider GO categories with between 5 and 200 gene annotations).
+* `numSamples`, number of iterations (`1e4` is the default, can ramp up to get better significance estimates for small _p_-values).
+
+### Random-Gene Null (Gene-Score Resampling)
 The Gene Score Resampling method for GSEA is performed using the function `SingleEnrichment`.
 This requires GO Terms and annotations to be processing (as described in the Initialization section below).
 To assess significance of gene scores annotated to a specific GO category, this analysis compares results to a null model in which scores are assigned to genes at random.
@@ -40,14 +56,7 @@ To assess significance of gene scores annotated to a specific GO category, this 
 __INPUTS__:
 * `geneScores`, a numGenes-long column vector of values that quantifies something about each gene.
 * `geneEntrezIDs`, numGenes-long column vector labeling the entrez ID for each gene in geneScores.
-Extra options set as fields in a parameter structure:
-* `dataSource`, specifies the source of GO annotations, to be loaded using `GetFilteredGOData`.
-Options are `mouse-direct` (hierarchy and annotations taken directly from GO), `human-direct` (hierarchy and annotations taken directly from GO), `mouse-GEMMA` (processed hierarchy and annotations downloaded from GEMMA).
-* `processFilter`, a subset of GO processes to consider.
-Default: `biological_process`.
-* `sizeFilter`, filter to a subset of GO categories by their number of annotations ('size').
-Default is `[5,200]` (only consider GO categories with between 5 and 200 gene annotations).
-* `numSamples`, number of iterations (`1e4` is the default, can ramp up to get better significance estimates for small p-values).
+Extra options set as fields in the parameter structure, `enrichmentSettings`.
 
 __EXAMPLE USAGE__:
 ```matlab
@@ -63,18 +72,19 @@ Note that _p_-values are estimated according to two different methods:
 Both _p_-value estimates are corrected using the method of false discovery rate (Benjamini and Hochberg), in the corresponding columns `pValPermCorr` and `pValZCorr`.
 
 ### Ensemble Enrichment
+
 Ensemble enrichment computes the enrichment of a given phenotype relative to an ensemble of randomized phenotypes.
+The approach is described in [this bioRxiv preprint](https://doi.org/10.1101/2020.04.24.058958).
 
 It proceeds through two steps:
-1. Compute the ensemble using `ComputeAllCategoryNulls`
-2. Perform enrichment for a phenotype of interest relative to this null ensemble using `EnsembleEnrichment`
+1. Compute the ensemble using `ComputeAllCategoryNulls`;
+2. Perform enrichment for a phenotype of interest relative to this null ensemble using `EnsembleEnrichment`.
 
 Default parameters for enrichment (including those relevant to ensemble enrichment) are set with `GiveMeDefaultEnrichmentParams`.
 
 __EXAMPLE USAGE__:
 ```matlab
-% Set parameters for the calculation
-% (alter parameters within this file to ensure appropriate output filename):
+% Set parameters for the calculation:
 enrichmentParams = GiveMeDefaultEnrichmentParams();
 
 % Compute category score null distributions resulting from a given null phenotype ensemble:
@@ -82,5 +92,5 @@ enrichmentParams = GiveMeDefaultEnrichmentParams();
 ComputeAllCategoryNulls(geneDataStruct,enrichmentParams,[],true,true);
 
 % Compares a given phenotype to the saved null ensemble
-GOTablePhenotype = EnsembleEnrichment(enrichmentParams.fileNameOut,phenotypeVector)
+GOTablePhenotype = EnsembleEnrichment(enrichmentParams.fileNameOut,phenotypeVector);
 ```
