@@ -34,7 +34,7 @@ enrichmentParams.aggregateHow = 'mean'; % 'mean', 'median'
 % What type of null:
 enrichmentParams.whatEnsemble = 'randomMap'; % 'randomMap', 'customEnsemble'
 
-% Specify a custom data file in the case of running 'spatialLag' enrichment:
+% Specify a custom data file in the case of running 'customEnsemble' enrichment:
 enrichmentParams.dataFileSurrogate = [];
 
 % Map parameters on to an appropriate file name to save results to:

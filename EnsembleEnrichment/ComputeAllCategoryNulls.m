@@ -6,9 +6,10 @@ function GOTable = ComputeAllCategoryNulls(geneDataStruct,enrichmentParams,pheno
 % All parameters of the caculation are set in the params structure
 %   (easiest way is to set default values using GiveMeDefaultEnsembleParams)
 %
-% geneDataStruct should be a structure containing:
-%   - expressionMatrix
-%   - entrezIDs (labeling genes as columns)
+% INPUTS:
+% ---geneDataStruct should be a structure containing:
+%       - expressionMatrix
+%       - entrezIDs (labeling genes as columns)
 %
 %-------------------------------------------------------------------------------
 

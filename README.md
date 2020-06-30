@@ -29,7 +29,7 @@ To initialize this toolbox, all of these subdirectories should be added to the M
 ## Preparation: Defining gene-to-category annotations
 
 The first step in running an enrichment analysis is defining the set of gene categories, and the genes annotated to each category.
-Results of this, using hierarchy-propagated gene-to-category annotations corresponding to GO biological processes (processed as of 2019-04-17), can be downloaded from [this figshare repository](https://figshare.com/s/71fe1d9b2386ec05f421).
+Results of this, using hierarchy-propagated gene-to-category annotations corresponding to GO biological processes (processed on 2019-04-17), can be downloaded from [this figshare repository](https://figshare.com/s/71fe1d9b2386ec05f421).
 
 Code in this repository also allows you to reprocess these annotations from raw data from GO, as described on [this wiki page](https://github.com/benfulcher/GeneSetEnrichmentAnalysis/wiki/Defining-gene-to-category-annotations).
 
@@ -76,24 +76,8 @@ Both _p_-value estimates are corrected using the method of false discovery rate 
 
 ### Ensemble Enrichment
 
+
 Ensemble enrichment computes the enrichment of a given phenotype relative to an ensemble of randomized phenotypes.
 The approach is described in [this bioRxiv preprint](https://doi.org/10.1101/2020.04.24.058958).
 
-It proceeds through two steps:
-1. Compute the ensemble using `ComputeAllCategoryNulls`;
-2. Perform enrichment for a phenotype of interest relative to this null ensemble using `EnsembleEnrichment`.
-
-Default parameters for enrichment (including those relevant to ensemble enrichment) are set with `GiveMeDefaultEnrichmentParams`.
-
-__EXAMPLE USAGE__:
-```matlab
-% Set parameters for the calculation:
-enrichmentParams = GiveMeDefaultEnrichmentParams();
-
-% Compute category score null distributions resulting from a given null phenotype ensemble:
-% (saves results out to a filename, enrichmentParams.fileNameOut):
-ComputeAllCategoryNulls(geneDataStruct,enrichmentParams,[],true,true);
-
-% Compares a given phenotype to the saved null ensemble
-GOTablePhenotype = EnsembleEnrichment(enrichmentParams.fileNameOut,phenotypeVector);
-```
+This proceeds across `ComputeAllCategoryNulls` (precompute category nulls) and `EnsembleEnrichment` (evaluate significance relative to these nulls), as described in the wiki.
