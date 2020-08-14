@@ -114,12 +114,17 @@ for i = 1:numGOCategories
         end
     end
 
+    %---------------------------------------------------------------------------
     % Aggregate gene-wise scores into an overall GO category score
     switch enrichmentParams.aggregateHow
     case 'mean'
         categoryScores{i} = nanmean(scoresHere,1);
+    case 'absmean'
+        categoryScores{i} = nanmean(abs(scoresHere),1);
     case 'median'
         categoryScores{i} = nanmedian(scoresHere,1);
+    case 'absmedian'
+        categoryScores{i} = nanmedian(abs(scoresHere),1);
     otherwise
         error('Unknown aggregation option: ''%s''',enrichmentParams.aggregateHow);
     end

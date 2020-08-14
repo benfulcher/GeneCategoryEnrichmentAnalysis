@@ -28,13 +28,14 @@ enrichmentParams.sigThresh = 0.05;
 % What type of correlation to use
 enrichmentParams.whatCorr = 'Spearman'; % 'Pearson', 'Spearman'
 
-% How to agglomerate scores within a GO category:
-enrichmentParams.aggregateHow = 'mean'; % 'mean', 'median'
+% How to aggregate scores within a GO category:
+enrichmentParams.aggregateHow = 'mean'; % 'mean', 'absmean', 'median', 'absmedian'
 
 % What type of null:
 enrichmentParams.whatEnsemble = 'randomMap'; % 'randomMap', 'customEnsemble'
 
 % Specify a custom data file in the case of running 'customEnsemble' enrichment:
+% (file containing the matrix of null phenotypes):
 enrichmentParams.dataFileSurrogate = [];
 
 % Map parameters on to an appropriate file name to save results to:
