@@ -6,7 +6,6 @@ function GOTable = GetFilteredGOData(whatSource,whatFilter,sizeFilter,ourEntrez)
 % Check Inputs:
 if nargin < 1
     whatSource = 'mouse-direct'; % Direct annotations from GO
-    % whatSource = 'mouse-GEMMA'; % Annotations derived from GEMMA
 end
 if nargin < 2
     whatFilter = 'biological_process';
@@ -20,7 +19,7 @@ end
 
 %-------------------------------------------------------------------------------
 % Load processed GO annotation data (i.e., direct annotations propagated up the hierarchy):
-% cf. propagateHierarchy to map files generated from ReadDirectAnnotationFile or ReadGEMMAAnnotationFile
+% cf. propagateHierarchy to map files generated from ReadDirectAnnotationFile (or ReadGEMMAAnnotationFile)
 switch whatSource
 case 'mouse-direct'
     fileNameLoad = sprintf('GOAnnotationDirect-mouse-%s-Prop.mat',whatFilter);
@@ -31,6 +30,7 @@ case 'mouse-GEMMA'
 otherwise
     error('Unknown annotation source: ''%s''',whatSource);
 end
+
 load(fileNameLoad,'GOTerms');
 fprintf(1,'Loaded annotated GO Terms from %s\n',fileNameLoad);
 
@@ -39,10 +39,11 @@ fprintf(1,'Loaded annotated GO Terms from %s\n',fileNameLoad);
 GOTermsFile = 'GOTerms_BP.mat';
 if strcmp(whatFilter,'biological_process') && exist(GOTermsFile,'file')
     load(GOTermsFile,'GOTable');
-    fprintf(1,'Loaded biological process GO terms from %s\n',GOTermsFile);
+    fprintf(1,'Loaded biological process GO terms from file: %s\n',GOTermsFile);
 else
     % Retrieve from mySQL database:
     GOTable = GetGOTerms(whatFilter);
+    fprintf(1,'Loaded biological process GO terms from SQL database\n');
 end
 
 %-------------------------------------------------------------------------------
@@ -57,7 +58,7 @@ GOTerms = GOTerms(ib,:);
 % Filter by category size:
 numGOCategories = height(GOTerms);
 if isempty(ourEntrez)
-    fprintf(1,'Filtering on actual annotated size of GO category\n');
+    fprintf(1,'Filtering GO categories on their number of gene annotations\n');
     sizeGOCategories = GOTerms.size;
     fprintf(1,'%u GO categories have no annotations :-/\n',...
                     sum(sizeGOCategories==0));
@@ -80,5 +81,15 @@ isGoodSize = (sizeGOCategories >= sizeFilter(1)) & (sizeGOCategories <= sizeFilt
 GOTable = GOTable(isGoodSize,:);
 fprintf(1,'Filtered to %u GO categories with between %u and %u annotations\n',...
                 height(GOTable),sizeFilter(1),sizeFilter(2));
+
+
+%-------------------------------------------------------------------------------
+% Check that all annotations in GOTable are column vectors:
+isRowVector = find(cellfun(@(x)size(x,2),GOTable.annotations)~=1);
+numRowVectorAnnotation = length(isRowVector);
+for i = 1:numRowVectorAnnotation
+    GOTable.annotations{isRowVector(i)} = GOTable.annotations{isRowVector(i)}';
+end
+fprintf(1,'Transposed %u category annotation vectors from row-vector -> column vector\n',numRowVectorAnnotation);
 
 end

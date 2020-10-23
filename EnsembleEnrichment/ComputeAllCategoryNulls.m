@@ -53,7 +53,7 @@ whatCorr = enrichmentParams.whatCorr;
 numNullSamples = enrichmentParams.numNullSamples;
 
 %-------------------------------------------------------------------------------
-% Get random vectors from real genes to use as null spatial maps:
+% Get randomized phenotypes to use as your null:
 switch enrichmentParams.whatEnsemble
 case 'customSpecified'
     % Specify a custom phenotype and just run the full calculation on this:
@@ -78,44 +78,62 @@ otherwise
 end
 
 %-------------------------------------------------------------------------------
-% Correlation of genes with a given spatial map (or null ensemble of spatial maps):
+% Prepare for category-wise agglomeration by first computing the correlation of 
+% each gene with a given spatial map (or a null ensemble of spatial maps)
+allAnnotatedGenesEntrez = unique(vertcat(GOTable.annotations{:}));
+numAnnotatedTotal = length(allAnnotatedGenesEntrez);
+allAnnotatedGenesEntrez = intersect(allAnnotatedGenesEntrez,entrezIDs);
+numAnnotatedGenes = length(allAnnotatedGenesEntrez);
+fprintf(1,'Of %u annotated genes, %u match genes we have expression data for\n',...
+                    numAnnotatedTotal,numAnnotatedGenes);
+
+geneScores = nan(numAnnotatedGenes,numNullSamples);
+fprintf(1,'Computing null distributions to %u null phenotypes for all %u genes annotated to GO categories\n',...
+                            numNullSamples,numAnnotatedGenes);
+for g = 1:numAnnotatedGenes
+    % Get this gene's expression vector:
+    matchMe = (entrezIDs==allAnnotatedGenesEntrez(g));
+    if sum(matchMe)~=1
+        fprintf(1,'How the heck did I get %u matches for gene entrez %u?!\n',...
+                            sum(matchMe),allAnnotatedGenesEntrez(g));
+    end
+    expressionVector = geneData(:,matchMe);
+
+    % The correlation to compute for this gene:
+    theCorr_fun = @(x) corr(x,expressionVector,'type',whatCorr,'rows','pairwise');
+    if numNullSamples==1
+        geneScores(g) = theCorr_fun(nullMaps(:,1));
+    else
+        parfor n = 1:numNullSamples
+            geneScores(g,n) = theCorr_fun(nullMaps(:,n));
+        end
+    end
+end
+
+%-------------------------------------------------------------------------------
+% Agglomerate gene scores by GO category:
 categoryScores = cell(numGOCategories,1);
 for i = 1:numGOCategories
     if beVerbose
-        fprintf(1,'\n\n\nCategory %u/%u\n',i,numGOCategories);
-
-        fprintf(1,'Looking in at %s:%s (%u)\n',GOTable.GOIDlabel{i},...
-                            GOTable.GOName{i},GOTable.size(i));
+        fprintf(1,'\n\n\nLooking in at Category %u/%u. %s:%s (%u)\n',...
+            i,numGOCategories,GOTable.GOIDlabel{i},GOTable.GOName{i},GOTable.size(i));
     end
 
     % Match genes for this category:
-    theGenesEntrez = GOTable.annotations{i};
-    matchMe = find(ismember(entrezIDs,theGenesEntrez));
-    geneDataCategory = geneData(:,matchMe);
+    categoryEntrez = GOTable.annotations{i};
+    matchMe = find(ismember(allAnnotatedGenesEntrez,categoryEntrez));
     numGenesCategory = length(matchMe);
 
     if beVerbose
         fprintf(1,'%u/%u genes from this GO category have matching records in the expression data\n',...
-                            length(matchMe),length(theGenesEntrez));
+                    length(matchMe),length(theGenesEntrez));
     end
 
-    % Compute the distribution of gene-category scores for correlation with the null maps:
-    scoresHere = nan(numGenesCategory,numNullSamples);
-    for k = 1:numGenesCategory
-        expressionVector = geneDataCategory(:,k);
-        % The correlation to compute for this gene:
-        theCorr_fun = @(x) corr(x,expressionVector,'type',whatCorr,'rows','pairwise');
-        if numNullSamples==1
-            scoresHere(k) = theCorr_fun(nullMaps(:,1));
-        else
-            parfor j = 1:numNullSamples
-                scoresHere(k,j) = theCorr_fun(nullMaps(:,j));
-            end
-        end
-    end
+    % Retrieve the distribution of gene scores across phenotypes:
+    scoresHere = geneScores(matchMe,:);
 
     %---------------------------------------------------------------------------
-    % Aggregate gene-wise scores into an overall GO category score
+    % Aggregate gene-wise scores into an overall GO category score (for each phenotype)
     switch enrichmentParams.aggregateHow
     case 'mean'
         categoryScores{i} = nanmean(scoresHere,1);
