@@ -1,19 +1,20 @@
-# Gene Category Enrichment Analysis
+# Gene Category Enrichment Analysis including Custom Null Ensembles
 
 [![DOI](https://zenodo.org/badge/79196471.svg)](https://zenodo.org/badge/latestdoi/79196471)
 
 This is a Matlab toolbox for performing gene category enrichment analysis relative to two different types of null models:
 1. ___Random-gene nulls___, in which categories assessed relative to categories of the same size but annotated by the same number of random genes.
    This follows the permutation-based method of Gene Score Resampling (as implemented in [*ermineJ*](https://erminej.msl.ubc.ca/)).
-2. ___Ensemble-based nulls___, in which categories are assessed relative to an ensemble of null phenotypes, as introduced in [this bioRxiv preprint](https://doi.org/10.1101/2020.04.24.058958).
+2. ___Ensemble-based nulls___, in which categories are assessed relative to an ensemble of randomized phenotypes, as introduced in [our bioRxiv preprint](https://doi.org/10.1101/2020.04.24.058958).
 
 Instructions for performing the basic functions of these analyses are in [the wiki :notebook:](https://github.com/benfulcher/GeneCategoryEnrichmentAnalysis/wiki).
 
-The package is currently set up to perform enrichment on [Gene Ontology](http://geneontology.org/) (GO) Biological Process annotations, but could be modified in future to use other GO annotations, or use other annotation systems (like [KEGG](https://www.genome.jp/kegg/)).
+The package is currently set up to perform enrichment on [Gene Ontology](http://geneontology.org/) (GO) Biological Process annotations, but could be modified straightforwardly to use other types of GO annotations, or even to use other annotation systems like [KEGG](https://www.genome.jp/kegg/).
 
 Pull requests to improve the functionality and clarity of documentation are very welcome!
 
 #### Repository Organization
+
 The package is organized into directories as follows:
 
 __DATA__:
@@ -29,14 +30,16 @@ __CODE__:
 To initialize this toolbox, all of these subdirectories should be added to the Matlab path by running the `startup` script.
 
 ## Running analysis
-Summary is here; see [the wiki :notebook:](https://github.com/benfulcher/GeneCategoryEnrichmentAnalysis/wiki) for more detailed instructions.
+
+A summary of how to run an enrichment analysis with this package is describd here, but please read the [wiki :notebook:](https://github.com/benfulcher/GeneCategoryEnrichmentAnalysis/wiki) for more detailed instructions.
 
 ### Preparation: Defining gene-to-category annotations
 
 The first step in running an enrichment analysis is defining the set of gene categories, and the genes annotated to each category.
-Results of this, using hierarchy-propagated gene-to-category annotations corresponding to GO biological processes (processed on 2019-04-17), can be downloaded from [this figshare repository](https://figshare.com/s/71fe1d9b2386ec05f421).
+Results of this, using hierarchy-propagated gene-to-category annotations corresponding to GO biological processes (processed on 2019-04-17), can be downloaded from [this partner Zenodo data repository](https://doi.org/10.5281/zenodo.4460713).
 
-Code in this repository also allows you to reprocess these annotations from raw data from GO, as described on [this wiki page](https://github.com/benfulcher/GeneSetEnrichmentAnalysis/wiki/Defining-gene-to-category-annotations).
+Code in this repository also allows you to reprocess these annotations from raw data from GO, as described on [this wiki page](https://github.com/benfulcher/GeneCategoryEnrichmentAnalysis/wiki/Defining-gene-to-category-annotations).
+You can test this pipeline using the `term` and `term2term` tables from a mySQL download of the GO term data on 2019-04-17, which are also available in the associated [Zenodo data repository](https://doi.org/10.5281/zenodo.4460713).
 
 ### Performing Enrichment
 
@@ -49,7 +52,6 @@ Instructions to implement this are in the [wiki](https://github.com/benfulcher/G
 
 #### Ensemble enrichment
 
-Ensemble enrichment computes the enrichment of a given phenotype relative to an ensemble of randomized phenotypes.
-The approach is described in [this bioRxiv preprint](https://doi.org/10.1101/2020.04.24.058958).
+Ensemble enrichment computes the enrichment of a given phenotype relative to an ensemble of randomized phenotypes, as described in [our bioRxiv preprint](https://doi.org/10.1101/2020.04.24.058958).
 
 This proceeds across `ComputeAllCategoryNulls` (precompute category nulls) and `EnsembleEnrichment` (evaluate significance relative to these nulls), as described in the [wiki](https://github.com/benfulcher/GeneCategoryEnrichmentAnalysis/wiki/Ensemble-enrichment).
