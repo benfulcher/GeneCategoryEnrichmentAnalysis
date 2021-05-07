@@ -1,6 +1,5 @@
 function GOTablePhenotype = EnsembleEnrichment(geneDataStruct,fileNullEnsembleResults,phenotypeVector)
-% EnsembleEnrichment  Compute enrichment in different GO categories according to
-%                       a given null model.
+% EnsembleEnrichment  Compute enrichment across GO categories for a given null model.
 %
 % Assumes that nulls have been precomputed using ComputeAllCategoryNulls.
 %
@@ -44,10 +43,10 @@ enrichmentParams.whatEnsemble = 'customSpecified'; % allows us to feed in our cu
 GOTablePhenotype = ComputeAllCategoryNulls(geneDataStruct,enrichmentParams,phenotypeVector,false,false);
 
 % Check that we have the same GO category IDs in both cases:
-if ~(height(GOTableNull)==height(GOTablePhenotype)) && ~all(GOTableNull.GOID==GOTablePhenotype.GOID)
+numCategories = height(GOTablePhenotype);
+if ~(height(GOTableNull)==numCategories) && ~all(GOTableNull.GOID==GOTablePhenotype.GOID)
     error('Error matching GO Categories to precomputed null data...');
 end
-numCategories = height(GOTablePhenotype);
 
 %-------------------------------------------------------------------------------
 % Estimate p-values:
