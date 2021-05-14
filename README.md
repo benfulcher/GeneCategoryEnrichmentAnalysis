@@ -2,10 +2,13 @@
 
 [![DOI](https://zenodo.org/badge/79196471.svg)](https://zenodo.org/badge/latestdoi/79196471)
 
-This is a Matlab toolbox for performing gene category enrichment analysis relative to two different types of null models:
+This is a Matlab toolbox for performing gene-category enrichment analysis relative to two different types of null models:
 1. ___Random-gene nulls___, in which categories assessed relative to categories of the same size but annotated by the same number of random genes.
    This follows the permutation-based method of Gene Score Resampling (as implemented in [*ermineJ*](https://erminej.msl.ubc.ca/)).
-2. ___Ensemble-based nulls___, in which categories are assessed relative to an ensemble of randomized phenotypes, as introduced in [our bioRxiv preprint](https://doi.org/10.1101/2020.04.24.058958).
+2. ___Ensemble-based nulls___, in which categories are assessed relative to an ensemble of randomized phenotypes.
+
+The toolbox was introduced in our paper:
+- Fulcher et al. _Nature Communications_ (2021) [:green_book: 'Overcoming false-positive gene-category enrichment in the analysis of spatially resolved transcriptomic brain atlas data'](https://doi.org/10.1038/s41467-021-22862-1).
 
 Instructions for performing the basic functions of these analyses are in [the wiki :notebook:](https://github.com/benfulcher/GeneCategoryEnrichmentAnalysis/wiki).
 
