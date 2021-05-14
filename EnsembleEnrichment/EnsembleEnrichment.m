@@ -51,13 +51,20 @@ end
 %-------------------------------------------------------------------------------
 % Estimate p-values:
 %-------------------------------------------------------------------------------
+if isfield('whatTail',enrichmentParams)
+    whatTail = enrichmentParams.whatTail;
+else
+    whatTail = 'right';
+    fprintf(1,'Right-tailed test by default: larger values of %s %s correlation are interesting.\n',...
+                    enrichmentParams.aggregateHow,enrichmentParams.whatCorr);
+end
+
 GOTablePhenotype = EstimatePVals(GOTableNull.categoryScores,...
-                        [GOTablePhenotype.categoryScores{:}],'right',GOTablePhenotype);
+                    [GOTablePhenotype.categoryScores{:}],whatTail,GOTablePhenotype);
 
 % Sort by Gaussian-approximation p-values:
 GOTablePhenotype = sortrows(GOTablePhenotype,'pValZ','ascend');
 
-%-------------------------------------------------------------------------------
 % Give a basic output about significance using pValZCorr:
 sigThresh = 0.05;
 numSig = sum(GOTablePhenotype.pValZCorr < sigThresh);

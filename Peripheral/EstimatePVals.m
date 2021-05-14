@@ -4,10 +4,12 @@ function GOTable = EstimatePVals(nullScores,realScores,whatTail,GOTable)
 % Computes using both a permutation-based and fitted Gaussian approximation.
 %
 % INPUTS:
-% -nullScores (cell): a set of null scores for each GO category
-% -realScores (vector): scores for the same set of GO categories obtained from real data
-% -whatTail ('right' or 'left'): whether to use a right or left tailed test
-% -GOTable (table): the table to save the computations back to.
+% - nullScores (cell): a set of null scores for each GO category
+% - realScores (vector): scores for the same set of GO categories obtained from real data
+% - whatTail ('right' or 'left'): whether to use a right- or left-tailed test.
+%           'right': tests whether each realScores is greater than the null.
+%           'left': tests whether each realScores is less than the null.
+% - GOTable (table): the table to save the computations back to.
 %-------------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------------

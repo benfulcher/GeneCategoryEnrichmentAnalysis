@@ -34,6 +34,9 @@ enrichmentParams.aggregateHow = 'mean'; % 'mean', 'absmean', 'median', 'absmedia
 % What type of null:
 enrichmentParams.whatEnsemble = 'randomMap'; % 'randomMap', 'customEnsemble'
 
+% Higher or lower scores are 'better' (compute p-value from right or left tail):
+enrichmentParams.whatTail = 'right'; % higher scores (aggregateHow) are 'better'.
+
 % Specify a custom data file in the case of running 'customEnsemble' enrichment:
 % (file containing the matrix of null phenotypes):
 enrichmentParams.dataFileSurrogate = [];
