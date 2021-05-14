@@ -97,11 +97,11 @@ parfor i = 1:numGOCategories
         nullForSize = nullDistribution(GOCategorySizes(i)==uniqueSizes,:);
         switch whatTail
         case 'right'
-            pValPerm(i) = mean(categoryScores(i) >= nullForSize);
+            pValPerm(i) = mean(nullForSize >= categoryScores(i));
             pValZ(i) = 1 - normcdf(categoryScores(i),mean(nullForSize),std(nullForSize));
         case 'left'
-            pValPerm(i) = mean(categoryScores(i) <= nullForSize);
-            pValZ(i) = normcdf(scoreHere,mean(nullForSize),std(nullForSize));
+            pValPerm(i) = mean(nullForSize <= categoryScores(i));
+            pValZ(i) = normcdf(categoryScores(i),mean(nullForSize),std(nullForSize));
         otherwise
             error('Unknown tail setting, ''%s''',whatTail)
         end
