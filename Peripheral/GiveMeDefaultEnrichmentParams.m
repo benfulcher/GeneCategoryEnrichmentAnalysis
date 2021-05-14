@@ -20,6 +20,9 @@ enrichmentParams.numNullSamples = 4e4;
 % Display categories with corrected p-value below this threshold:
 enrichmentParams.sigThresh = 0.05;
 
+% How to aggregate scores within a GO category:
+enrichmentParams.aggregateHow = 'mean'; % 'mean', 'absmean', 'median', 'absmedian'
+
 % Higher or lower scores are 'better' (compute p-value from right or left tail):
 enrichmentParams.whatTail = 'right'; % higher scores (e.g., from aggregateHow) are 'better'.
 
@@ -29,9 +32,6 @@ enrichmentParams.whatTail = 'right'; % higher scores (e.g., from aggregateHow) a
 %-------------------------------------------------------------------------------
 % What type of correlation to use
 enrichmentParams.whatCorr = 'Spearman'; % 'Pearson', 'Spearman'
-
-% How to aggregate scores within a GO category:
-enrichmentParams.aggregateHow = 'mean'; % 'mean', 'absmean', 'median', 'absmedian'
 
 % What type of null:
 enrichmentParams.whatEnsemble = 'randomMap'; % 'randomMap', 'customEnsemble'

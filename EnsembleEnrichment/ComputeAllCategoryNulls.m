@@ -78,7 +78,7 @@ otherwise
 end
 
 %-------------------------------------------------------------------------------
-% Prepare for category-wise agglomeration by first computing the correlation of 
+% Prepare for category-wise agglomeration by first computing the correlation of
 % each gene with a given spatial map (or a null ensemble of spatial maps)
 allAnnotatedGenesEntrez = unique(vertcat(GOTable.annotations{:}));
 numAnnotatedTotal = length(allAnnotatedGenesEntrez);
@@ -111,7 +111,8 @@ for g = 1:numAnnotatedGenes
 end
 
 %-------------------------------------------------------------------------------
-% Agglomerate gene scores by GO category:
+% Agglomerate gene scores by GO category
+%-------------------------------------------------------------------------------
 categoryScores = cell(numGOCategories,1);
 for i = 1:numGOCategories
     if beVerbose
@@ -126,7 +127,7 @@ for i = 1:numGOCategories
 
     if beVerbose
         fprintf(1,'%u/%u genes from this GO category have matching records in the expression data\n',...
-                    length(matchMe),length(theGenesEntrez));
+                    numGenesCategory,length(theGenesEntrez));
     end
 
     % Retrieve the distribution of gene scores across phenotypes:
@@ -134,18 +135,7 @@ for i = 1:numGOCategories
 
     %---------------------------------------------------------------------------
     % Aggregate gene-wise scores into an overall GO category score (for each phenotype)
-    switch enrichmentParams.aggregateHow
-    case 'mean'
-        categoryScores{i} = nanmean(scoresHere,1);
-    case 'absmean'
-        categoryScores{i} = nanmean(abs(scoresHere),1);
-    case 'median'
-        categoryScores{i} = nanmedian(scoresHere,1);
-    case 'absmedian'
-        categoryScores{i} = nanmedian(abs(scoresHere),1);
-    otherwise
-        error('Unknown aggregation option: ''%s''',enrichmentParams.aggregateHow);
-    end
+    categoryScores{i} = AggregateScores(scoresHere,enrichmentParams.aggregateHow);
 end
 
 %-------------------------------------------------------------------------------

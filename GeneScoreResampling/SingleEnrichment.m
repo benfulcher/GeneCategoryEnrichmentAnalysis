@@ -1,4 +1,4 @@
-function GOTable = SingleEnrichment(geneScores,geneEntrezIDs,params);
+function GOTable = SingleEnrichment(geneScores,geneEntrezIDs,params)
 % SingleEnrichment   Perform gene category enrichment under a random-gene null
 %
 % This follows the permutation-based method of Gene Score Resampling, as
@@ -44,13 +44,19 @@ if isfield(params,'whatTail');
 else
     whatTail = 'right';
 end
+if isfield(params,'whatTail');
+    aggregateHow = params.aggregateHow;
+else
+    whatTail = 'mean';
+end
+
 
 %-------------------------------------------------------------------------------
-if length(geneScores)~=length(geneEntrezIDs)
-    error('Inconsistent numbers of genes scored (%u) and with entrez IDs provided (%u)',...
-                        length(geneScores),length(geneEntrezIDs));
-end
 numGenes = length(geneScores);
+if numGenes ~= length(geneEntrezIDs)
+    error('Inconsistent numbers of genes scored (%u) and with entrez IDs provided (%u)',...
+            numGenes,length(geneEntrezIDs));
+end
 
 % Retrieve GO annotations:
 GOTable = GetFilteredGOData(dataSource,processFilter,sizeFilter,geneEntrezIDs);
@@ -62,8 +68,8 @@ end
 %-------------------------------------------------------------------------------
 uniqueSizes = unique(GOTable.size);
 numSizes = length(uniqueSizes);
-fprintf(1,'Gene score resampling for %u iterations across %u category sizes (%u-%u)\n',...
-                        numSamples,numSizes,min(uniqueSizes),max(uniqueSizes));
+fprintf(1,'Gene-score resampling for %u iterations across %u category sizes (%u-%u)\n',...
+                numSamples,numSizes,min(uniqueSizes),max(uniqueSizes));
 
 %-------------------------------------------------------------------------------
 % Compute the mean score for each GO category:
@@ -71,7 +77,8 @@ categoryScores = nan(numGOCategories,1);
 for i = 1:numGOCategories
     matchMe = ismember(geneEntrezIDs,GOTable.annotations{i});
     if sum(matchMe) > 0
-        categoryScores(i) = nanmean(geneScores(matchMe));
+        geneScoresHere = geneScores(matchMe);
+        categoryScores(i) = AggregateScores(geneScoresHere,aggregateHow);
     end
 end
 
@@ -81,7 +88,7 @@ nullDistribution = PermuteForNullDistributions(geneScores,uniqueSizes,numSamples
 % nullDistribution: numSizes x numSamples
 
 %-------------------------------------------------------------------------------
-% Compute p-values (bigger scores are better)
+% Compute p-values
 pValPerm = nan(numGOCategories,1); % Discrete, count-based estimate from size-stratified permutation
 pValZ = nan(numGOCategories,1); % Gaussian approximation
 GOCategorySizes = GOTable.size; % Speeds up parfor loop
