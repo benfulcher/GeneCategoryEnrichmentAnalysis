@@ -47,7 +47,7 @@ end
 if isfield(params,'whatTail');
     aggregateHow = params.aggregateHow;
 else
-    whatTail = 'mean';
+    aggregateHow = 'mean';
 end
 
 
