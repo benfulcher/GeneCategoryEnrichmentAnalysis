@@ -24,6 +24,8 @@ function GOTable = SingleEnrichment(geneScores,geneEntrezIDs,params);
 %                   (i.e., consider categories with between 5 and 200 annotations).
 %     - numSamples, number of permutation iterations for null. Default: 1e4.
 %                   Can ramp up to get better significance estimates for small p-values).
+%     - whatTail, whether higher ('right') or lower ('left') scores are 'better'
+%                   (when computing p-values from null).
 %-------------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------------
@@ -37,6 +39,11 @@ dataSource = params.dataSource;
 processFilter = params.processFilter;
 sizeFilter = params.sizeFilter;
 numSamples = params.numNullSamples;
+if isfield(params,'whatTail');
+    whatTail = params.whatTail;
+else
+    whatTail = 'right';
+end
 
 %-------------------------------------------------------------------------------
 if length(geneScores)~=length(geneEntrezIDs)
@@ -75,28 +82,37 @@ nullDistribution = PermuteForNullDistributions(geneScores,uniqueSizes,numSamples
 
 %-------------------------------------------------------------------------------
 % Compute p-values (bigger scores are better)
-pVal = nan(numGOCategories,1); % Discrete, count-based estimate from size-stratified permutation
+pValPerm = nan(numGOCategories,1); % Discrete, count-based estimate from size-stratified permutation
 pValZ = nan(numGOCategories,1); % Gaussian approximation
+GOCategorySizes = GOTable.size; % Speeds up parfor loop
 parfor i = 1:numGOCategories
     if ~isnan(categoryScores(i))
-        nullForSize = nullDistribution(GOTable.size(i)==uniqueSizes,:);
-        pVal(i) = mean(categoryScores(i) < nullForSize);
-        pValZ(i) = 1 - normcdf(categoryScores(i),mean(nullForSize),std(nullForSize));
+        nullForSize = nullDistribution(GOCategorySizes(i)==uniqueSizes,:);
+        switch whatTail
+        case 'right'
+            pValPerm(i) = mean(categoryScores(i) >= nullForSize);
+            pValZ(i) = 1 - normcdf(categoryScores(i),mean(nullForSize),std(nullForSize));
+        case 'left'
+            pValPerm(i) = mean(categoryScores(i) <= nullForSize);
+            pValZ(i) = normcdf(scoreHere,mean(nullForSize),std(nullForSize));
+        otherwise
+            error('Unknown tail setting, ''%s''',whatTail)
+        end
     end
 end
 
 %-------------------------------------------------------------------------------
 % FDR-correction to p-values:
-pValCorr = mafdr(pVal,'BHFDR','true');
+pValPermCorr = mafdr(pValPerm,'BHFDR','true');
 pValZCorr = mafdr(pValZ,'BHFDR','true');
 
 %-------------------------------------------------------------------------------
 % Update the GO table:
 GOTable.meanScore = categoryScores;
 GOTable.pValZ = pValZ; % Estimated p-value from Gaussian approximation to null
-GOTable.pValPerm = pVal; % Permutation test
+GOTable.pValPerm = pValPerm; % Permutation test
 GOTable.pValZCorr = pValZCorr;
-GOTable.pValPermCorr = pValCorr;
+GOTable.pValPermCorr = pValPermCorr;
 
 %-------------------------------------------------------------------------------
 % Sort:

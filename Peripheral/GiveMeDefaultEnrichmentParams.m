@@ -20,6 +20,8 @@ enrichmentParams.numNullSamples = 4e4;
 % Display categories with corrected p-value below this threshold:
 enrichmentParams.sigThresh = 0.05;
 
+% Higher or lower scores are 'better' (compute p-value from right or left tail):
+enrichmentParams.whatTail = 'right'; % higher scores (e.g., from aggregateHow) are 'better'.
 
 %-------------------------------------------------------------------------------
 % Additional details specific to the ensemble-based enrichment:
@@ -33,9 +35,6 @@ enrichmentParams.aggregateHow = 'mean'; % 'mean', 'absmean', 'median', 'absmedia
 
 % What type of null:
 enrichmentParams.whatEnsemble = 'randomMap'; % 'randomMap', 'customEnsemble'
-
-% Higher or lower scores are 'better' (compute p-value from right or left tail):
-enrichmentParams.whatTail = 'right'; % higher scores (aggregateHow) are 'better'.
 
 % Specify a custom data file in the case of running 'customEnsemble' enrichment:
 % (file containing the matrix of null phenotypes):

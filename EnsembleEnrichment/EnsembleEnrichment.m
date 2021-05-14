@@ -51,7 +51,7 @@ end
 %-------------------------------------------------------------------------------
 % Estimate p-values:
 %-------------------------------------------------------------------------------
-if isfield('whatTail',enrichmentParams)
+if isfield(enrichmentParams,'whatTail')
     whatTail = enrichmentParams.whatTail;
 else
     whatTail = 'right';
