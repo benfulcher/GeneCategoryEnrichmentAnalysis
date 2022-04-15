@@ -28,11 +28,16 @@ load(fileNameLoad,'allGOCategories','geneEntrezAnnotations');
 numGOCategoriesDirect = length(allGOCategories); % GO categories with direct annotations
 
 GOTerms = GetGOTerms(whatFilter);
+% Alternatively, if you've extracted the biological process terms manually
+% from the term.txt file, you can simply load in your created
+% GOTerms_BP.csv as a table
 
 %-------------------------------------------------------------------------------
 % mySQL query for hierarchy:
 %-------------------------------------------------------------------------------
-dbc = ConnectMeDatabase();
+% Replace following with path to the db of your GO release created in sqlite3
+% (following the format of GODaily_2021-01-25.sql used in the Fulcher paper)
+dbc = sqlite('D:\McGill\cobralab\PS_Dimensions\gene_mapping\GCEA_data\2022-01-13\GO_2022-01-13.db', 'readonly');
 
 % e.g., Get all biological_process-tagged GO categories
 % selectText = sprintf('SELECT term1_id,term2_id FROM term2term WHERE relationship_type_id = 1');
@@ -47,13 +52,13 @@ dbc = ConnectMeDatabase();
 selectText1 = ['SELECT term2term.id,term.acc FROM term INNER JOIN term2term ON ',...
                 'term.id=term2term.term1_id WHERE term2term.relationship_type_id IN (1,25,27) ',...
                 'AND term.acc LIKE "GO:%"'];
-hierarchyRel1 = mysql_dbquery(dbc,selectText1);
+hierarchyRel1 = fetch(dbc, selectText1);
 selectText2 = ['SELECT term2term.id,term.acc FROM term INNER JOIN term2term ON ',...
                 'term.id=term2term.term2_id WHERE term2term.relationship_type_id IN (1,25,27) ',...
                 'AND term.acc LIKE "GO:%"'];
-hierarchyRel2 = mysql_dbquery(dbc,selectText2);
+hierarchyRel2 = fetch(dbc, selectText2);
 %1==is_a, 25==part_of, 27==regulates
-SQL_closedatabase(dbc);
+close(dbc)
 
 id1 = vertcat(hierarchyRel1{:,1});
 id2 = vertcat(hierarchyRel2{:,1});
