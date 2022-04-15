@@ -101,6 +101,9 @@ else
     fprintf(1,'Mapping by symbol for now...\n');
     warning('Requires MouseEdge repository to access human gene information')
     % Get expression data from https://github.com/benfulcher/MouseEdge:
+    % NOTE: The repo name above is outdated;
+    % https://github.com/benfulcher/GCEA_FalsePositives is needed to run
+    % the below code
     params = GiveMeDefaultParams('human');
     [~,geneInfo] = LoadMeG(params.g);
     geneEntrez = nan(numUniqueGenes,1);
