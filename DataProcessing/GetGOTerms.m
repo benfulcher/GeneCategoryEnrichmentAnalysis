@@ -9,11 +9,13 @@ end
 if nargin < 2
     doSave = false;
 end
-%-------------------------------------------------------------------------------
 
 % Replace following with path to the db of your GO release created in sqlite3
 % (following the format of GODaily_2021-01-25.sql used in the Fulcher paper)
-dbc = sqlite('D:\McGill\cobralab\PS_Dimensions\gene_mapping\GCEA_data\2022-01-13\GO_2022-01-13.db', 'readonly');
+dbPath = '../GCEA_data/2022-01-13/GO_2022-01-13.db';
+%-------------------------------------------------------------------------------
+
+dbc = sqlite(dbPath, 'readonly');
 
 % e.g., Get all biological_process-tagged GO categories
 selectText = sprintf('SELECT acc,name FROM term WHERE term_type LIKE ''%s''',whatFilter);
