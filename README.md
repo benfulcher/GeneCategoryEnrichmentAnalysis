@@ -16,15 +16,25 @@ The package is currently set up to perform enrichment on [Gene Ontology](http://
 
 Pull requests to improve the functionality and clarity of documentation are very welcome!
 
-#### Repository Organization
+### Alternative Packages
+
+Note that this repository is no longer in active development, but the same null-testing procedure has been re-implemented in other packages.
+I would recommend investigating these alternatives:
+
+- [ABAnnotate](https://github.com/LeonDLotter/ABAnnotate) (Matlab)
+- The [Imaging-Transcriptomics](https://github.com/molecular-neuroimaging/Imaging_Transcriptomics) toolbox (python).
+
+### Repository Organization
 
 The package is organized into directories as follows:
 
-__DATA__:
+#### Data:
+
 1. `RawData`: all data downloaded from external sources (like GO, MouseMine, etc.)
 2. `ProcessedData`: raw data processed into Matlab-readable files.
 
-__CODE__:
+#### Code:
+
 1. `DataProcessing`: code required to process raw data.
 2. `GeneScoreResampling`, `EnsembleEnrichment`: code to run both random-gene and randomized-phenotype enrichment analysis.
 3. `ResultsComparison`: code to compare GSEA results to _ermineJ_.
@@ -32,7 +42,7 @@ __CODE__:
 
 To initialize this toolbox, all of these subdirectories should be added to the Matlab path by running the `startup` script.
 
-## Running analysis
+## Running an Analysis
 
 A summary of how to run an enrichment analysis with this package is describd here, but please read the [wiki :notebook:](https://github.com/benfulcher/GeneCategoryEnrichmentAnalysis/wiki) for more detailed instructions.
 
@@ -57,6 +67,6 @@ Instructions to implement this are in the [wiki](https://github.com/benfulcher/G
 
 #### Ensemble enrichment
 
-Ensemble enrichment computes the enrichment of a given phenotype relative to an ensemble of randomized phenotypes, as described in [our bioRxiv preprint](https://doi.org/10.1101/2020.04.24.058958).
+Ensemble enrichment computes the enrichment of a given phenotype relative to an ensemble of randomized phenotypes, as described in [our paper](https://doi.org/10.1038/s41467-021-22862-1).
 
 This proceeds across `ComputeAllCategoryNulls` (precompute category nulls) and `EnsembleEnrichment` (evaluate significance relative to these nulls), as described in the [wiki](https://github.com/benfulcher/GeneCategoryEnrichmentAnalysis/wiki/Ensemble-enrichment).
