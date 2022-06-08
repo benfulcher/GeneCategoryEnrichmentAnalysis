@@ -100,7 +100,7 @@ else
     fprintf(1,'No geneEntrez mapping implemented for %s (yet)\n',whatSpecies);
     fprintf(1,'Mapping by symbol for now...\n');
     warning('Requires MouseEdge repository to access human gene information')
-    % Get expression data from https://github.com/benfulcher/MouseEdge:
+    % Get expression data from https://github.com/benfulcher/GCEA_FalsePositives:
     params = GiveMeDefaultParams('human');
     [~,geneInfo] = LoadMeG(params.g);
     geneEntrez = nan(numUniqueGenes,1);

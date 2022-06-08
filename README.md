@@ -36,6 +36,8 @@ To initialize this toolbox, all of these subdirectories should be added to the M
 
 A summary of how to run an enrichment analysis with this package is describd here, but please read the [wiki :notebook:](https://github.com/benfulcher/GeneCategoryEnrichmentAnalysis/wiki) for more detailed instructions.
 
+**NOTE: This package relied on MySQL downloads of the GO data, but GO no longer provides their ontology in this format. As a workaround, the directory `oboConversion` has been added which includes instructions and code for converting recent GO releases (available as `go-basic.obo` files) into an sqlite database, and `DataProcessing` scripts have been updated with sqlite commands to bypass the need to use a MySQL connection.**
+
 ### Preparation: Defining gene-to-category annotations
 
 The first step in running an enrichment analysis is defining the set of gene categories, and the genes annotated to each category.
