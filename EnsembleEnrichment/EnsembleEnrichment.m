@@ -63,11 +63,13 @@ GOTablePhenotype = EstimatePVals(GOTableNull.categoryScores,...
                     [GOTablePhenotype.categoryScores{:}],whatTail,GOTablePhenotype);
 
 % Sort by Gaussian-approximation p-values:
-GOTablePhenotype = sortrows(GOTablePhenotype,'pValZ','ascend');
+%GOTablePhenotype = sortrows(GOTablePhenotype,'pValZ','ascend');
+GOTablePhenotype = sortrows(GOTablePhenotype,'pValPermCorr','ascend');
 
 % Give a basic output about significance using pValZCorr:
 sigThresh = 0.05;
-numSig = sum(GOTablePhenotype.pValZCorr < sigThresh);
-fprintf(1,'%u significant categories at p_Z_corr < %.2f\n',numSig,sigThresh);
-
+%numSig = sum(GOTablePhenotype.pValZCorr < sigThresh);
+numSig = sum(GOTablePhenotype.pValPermCorr < sigThresh);
+%fprintf(1,'%u significant categories at p_Z_corr < %.2f\n',numSig,sigThresh);
+fprintf(1,'%u significant categories at p_Perm_corr < %.2f\n',numSig,sigThresh);
 end

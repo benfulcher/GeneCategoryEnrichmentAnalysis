@@ -8,6 +8,8 @@ enrichmentParams = struct();
 % (sufficient for conventional enrichment)
 %-------------------------------------------------------------------------------
 
+enrichmentParams.dataSource = 'human-direct';
+
 % What high-level GO categories to filter:
 enrichmentParams.processFilter = 'biological_process';
 
